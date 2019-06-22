@@ -2,8 +2,11 @@
 #define PIECE_GUARD
 struct Piece {
 	char symbol;
+	char color;
 	int y;
 	int x;
   Piece(char, int, int);
 };
+
+bool operator== (const Piece&, const Piece&);
 #endif
