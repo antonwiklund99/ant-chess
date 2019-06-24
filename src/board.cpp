@@ -6,25 +6,35 @@
 #include <vector>
 #include <cctype>
 #include <algorithm>
+#include <array>
+using std::array;
 using std::isupper;
 using std::islower;
 using std::ostream;
 using std::vector;
 using std::tolower;
 using std::find;
+using std::find_if;
 
 // Constructor for Board class, creates starting board, puts pieces into vectors
 // and set next move to white
-Board::Board() : board {
-												'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R',
-												'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P',
-												'0', '0', '0', '0', '0', '0', '0', '0',
-												'0', '0', '0', '0', '0', '0', '0', '0',
-												'0', '0', '0', '0', '0', '0', '0', '0',
-												'0', '0', '0', '0', '0', '0', '0', '0',
-												'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p',
-												'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'
-}, next_move('w') {
+Board::Board() : board {{
+												{'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'},
+												{'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
+												{'0', '0', '0', '0', '0', '0', '0', '0'},
+												{'0', '0', '0', '0', '0', '0', '0', '0'},
+												{'0', '0', '0', '0', '0', '0', '0', '0'},
+												{'0', '0', '0', '0', '0', '0', '0', '0'},
+												{'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
+												{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'}
+												 }}, next_move('w'), check(false), checkmate(false) {
+	get_pieces_from_board(black_pieces, white_pieces);
+	parse_legal_moves();
+}
+
+// Constructor for board give all member variables
+Board::Board(array<array<char, 8>, 8> b, char nm, bool c ) :
+	board(b), next_move(nm), check(c) {
 	get_pieces_from_board(black_pieces, white_pieces);
 	parse_legal_moves();
 }
@@ -50,15 +60,9 @@ void Board::get_pieces_from_board(vector<Piece>& black, vector<Piece>& white) {
 
 void Board::parse_legal_moves() {
 	legal_moves.clear();
-	vector<Piece> *piece_vector = 0;
-	if (next_move == 'w') {
-		piece_vector = &white_pieces;
-	}
-	else {
-		piece_vector = &black_pieces;
-	}
+	const vector<Piece> &piece_vector = (next_move == 'w') ? white_pieces : black_pieces;
 
-	for (auto it = (*piece_vector).begin(); it != (*piece_vector).end(); ++it) {
+	for (auto it = piece_vector.begin(); it != piece_vector.end(); ++it) {
 		switch(tolower(it->symbol)) {
 		case 'r':
 			walk_board(legal_moves, *it, 1, 0, 8);
@@ -184,47 +188,82 @@ void Board::move_piece(const Move& m) {
 		throw std::invalid_argument("Move is not a legal move");
 	}
 
+	// Set check to false because it can longer be it if move is legal
+	check = false;
+
+	vector<Piece>& target_vec = (next_move != 'w') ? white_pieces : black_pieces;
 	if (m.capture) {
 		// Removes captured piece from pieces vector
 		Piece target(board[m.to_y][m.to_x], m.to_y, m.to_x);
-		if (target.color == 'w') {
-			auto remove_target = find(white_pieces.begin(), white_pieces.end(), target);
-			white_pieces.erase(remove_target);
-		}
-		else {
-			auto remove_target = find(black_pieces.begin(), black_pieces.end(), target);
-			black_pieces.erase(remove_target);
-		}
+		auto remove_target = find(target_vec.begin(), target_vec.end(), target);
+		target_vec.erase(remove_target);
 	}
 
 	// Change x,y cords in vector
-	if (next_move == 'w') {
-		for (auto it = white_pieces.begin(); it != white_pieces.end(); ++it) {
-			if (it->y == m.from_y && it->x == m.from_x) {
-				it->y = m.to_y;
-				it->x = m.to_x;
-				break;
-			}
+	vector<Piece>& piece_vec = (next_move == 'w') ? white_pieces : black_pieces;
+	for (auto it = piece_vec.begin(); it != piece_vec.end(); ++it) {
+		if (it->y == m.from_y && it->x == m.from_x) {
+			it->y = m.to_y;
+			it->x = m.to_x;
+			break;
 		}
-		next_move = 'b';
 	}
-	else 	if (next_move == 'b') {
-		for (auto it = black_pieces.begin(); it != black_pieces.end(); ++it) {
-			if (it->y == m.from_y && it->x == m.from_x) {
-				it->y = m.to_y;
-				it->x = m.to_x;
-				break;
-			}
-		}
-		next_move = 'w';
-	}
+
+	// Check if move puts board other side in check
+	parse_legal_moves();
+	check = is_check(target_vec, legal_moves);
 
 	// Move piece on board
 	board[m.to_y][m.to_x] = board[m.from_y][m.from_x];
 	board[m.from_y][m.from_x] = '0';
 
+	// Change turn
+	next_move = (next_move == 'w') ? 'b' : 'w';
+
 	// Generate new legal moves list
 	parse_legal_moves();
+	if (check) {
+		// Check for checkmate
+		auto fml = legal_moves;
+		checkmate = is_checkmate(board, next_move, check, fml);
+		legal_moves = fml;
+	}
+}
+
+bool is_check(const vector<Piece>& target_vec, const vector<Move>& move_vec) {
+	// Check for check TODO: maybe make a seperate variable for king postion
+	auto king_piece = find_if(target_vec.begin(), target_vec.end(), piece_is_king);
+	for (auto it = move_vec.begin(); it != move_vec.end(); ++it) {
+		if (it->to_x == king_piece->x && it->to_y == king_piece->y) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool piece_is_king(const Piece& p) {
+	return (tolower(p.symbol) == 'k');
+}
+
+bool is_checkmate(const array<array<char, 8>, 8>& b, char nm, bool c, vector<Move>& leg_moves) {
+	// TODO fix this, if other side also has check sketchy stuff will happen
+	for (auto it = leg_moves.begin(); it != leg_moves.end();) {
+		Board tmp_board(b, nm, c);
+		tmp_board.move_piece(*it);
+		if (is_check(tmp_board.get_next_move() == 'w' ? tmp_board.get_black_pieces() :
+								 tmp_board.get_white_pieces(), tmp_board.get_legal_moves())){
+			it = leg_moves.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+	if (leg_moves.size() == 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 // When printing board class print board array
