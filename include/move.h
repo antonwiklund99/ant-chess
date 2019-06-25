@@ -11,9 +11,11 @@ struct Move {
 	// Construct move from long algebraic chess notation
 	Move(std::string, char);
   Move(int, int, int, int, bool, char);
-	// TODO add function to get notation of move https://en.wikipedia.org/wiki/Chess_notation
+
+	std::string notation();
 };
 
 bool operator== (const Move&, const Move&);
 int letter_to_index(char);
+char index_to_letter(int);
 #endif

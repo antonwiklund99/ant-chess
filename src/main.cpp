@@ -1,9 +1,11 @@
+
 #include "board.h"
 #include "piece.h"
 #include "move.h"
 #include <iostream>
 #include <vector>
 #include <string>
+#include <stdexcept>
 using std::vector;
 using std::cout;
 using std::endl;
@@ -22,22 +24,29 @@ int main(int argc, char *argv[]) {
 		cout << it->symbol << " " << it->y << " " << it->x << "\n";
 		}*/
 	std::string m;
-	for (int i = 0; i != 10; ++i) {
+	do {
+		cout << "[Piece cordinate from(xy)][x/-][cordinate to]" << endl;
+		std::cin >> m;
+
+		Move t(m, board.get_next_move());
+		try {
+			board.move_piece(t);
+		}
+		catch(std::invalid_argument) {
+			cout << "invalid argument" << endl;
+		}
+
 		auto moves = board.get_legal_moves();
-		for (auto it = moves.begin(); it != moves.end(); ++it) {
+		cout << "legal moves:" << endl;
+		for (auto it = moves.begin(); it != moves.end(); ++it) { /*
 			cout << "From:" << it->from_x << " " << it->from_y << " " <<
-				it->to_x << " " << it->to_y << " Piece: " << it->piece << '\n';
+			it->to_x << " " << it->to_y << " Piece: " << it->piece << '\n';*/
+			cout << (*it).notation() << endl;
 		}
 		cout << "next move = " << board.get_next_move() << "\n";
 		cout << "check = " << board.board_is_check() << '\n';
 		cout << "checkmate = " << board.board_is_checkmate() << '\n';
 		cout << board << "\n";
-
-		cout << "[Piece cordinate from(xy)][x/-][cordinate to]" << endl;
-		std::cin >> m;
-
-		Move t(m, board.get_next_move());
-		board.move_piece(t);
-	}
+	} while(!board.board_is_checkmate());
 	return 0;
 }

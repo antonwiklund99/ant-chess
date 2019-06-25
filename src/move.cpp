@@ -3,17 +3,16 @@
 #include <string>
 #include <cctype>
 #include <algorithm>
-#include <iostream>
 using std::string;
 using std::islower;
 using std::find;
 using std::tolower;
+using std::to_string;
 
 // Move constructor from long algebraic chess move notation
 // format = [piece, except pawn][cordinate from][x if capture][cordinate to]
 Move::Move(string s, char turn) {
 	bool is_pawn = islower(s[0]);
-	std::cout << is_pawn << std::endl;
 	capture = find(s.begin(), s.end(), 'x') != s.end();
 	int index = 1;
 	char p;
@@ -42,6 +41,19 @@ bool operator== (const Move& lhs, const Move& rhs) {
 					lhs.to_y == rhs.to_y && lhs.piece == rhs.piece && lhs.capture == rhs.capture);
 }
 
+string Move::notation() {
+	string out;
+	if (toupper(piece) != 'P') {
+		out.push_back(toupper(piece));
+	}
+	out.push_back(index_to_letter(from_x));
+	out += to_string(from_y);
+	out.push_back((capture) ? 'x' : '-');
+	out.push_back(index_to_letter(to_x));
+	out += to_string(to_y);
+	return out;
+}
+
 int letter_to_index(char c) {
 	switch(c) {
 	case 'a': return 0;
@@ -55,4 +67,19 @@ int letter_to_index(char c) {
 	default: break;
 	}
 	return -1;
+}
+
+char index_to_letter(int i) {
+	switch(i) {
+	case 0: return 'a';
+	case 1: return 'b';
+	case 2: return 'c';
+	case 3: return 'd';
+	case 4: return 'e';
+	case 5: return 'f';
+	case 6: return 'g';
+	case 7: return 'h';
+	default: break;
+	}
+	return 'x';
 }
