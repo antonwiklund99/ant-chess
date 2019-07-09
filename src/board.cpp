@@ -29,14 +29,24 @@ Board::Board() : board {{
 												{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'}
 												 }}, next_move('w'), check(false), checkmate(false) {
 	get_pieces_from_board(black_pieces, white_pieces);
-	parse_legal_moves();
+	parse_legal_moves(next_move);
 }
 
 // Constructor for board give all member variables
-Board::Board(array<array<char, 8>, 8> b, char nm, bool c ) :
+Board::Board(array<array<char, 8>, 8> b, char nm) :
+	board(b), next_move(nm) {
+	get_pieces_from_board(black_pieces, white_pieces);
+	parse_legal_moves((nm == 'b') ? 'w' : 'b');
+	// Want to check if current color is in check/checkmate
+	check = is_check((nm == 'b') ? black_pieces: white_pieces, legal_moves);
+	parse_legal_moves(next_move);
+	checkmate = (check) ? is_checkmate(b, next_move, legal_moves) : false;
+}
+
+Board::Board(array<array<char, 8>, 8> b, char nm, bool c) :
 	board(b), next_move(nm), check(c) {
 	get_pieces_from_board(black_pieces, white_pieces);
-	parse_legal_moves();
+	parse_legal_moves(nm);
 }
 
 // Parses board and puts pieces into two vectors
@@ -58,9 +68,9 @@ void Board::get_pieces_from_board(vector<Piece>& black, vector<Piece>& white) {
 	}
 }
 
-void Board::parse_legal_moves() {
+void Board::parse_legal_moves(char side) {
 	legal_moves.clear();
-	const vector<Piece> &piece_vector = (next_move == 'w') ? white_pieces : black_pieces;
+	const vector<Piece> &piece_vector = (side == 'w') ? white_pieces : black_pieces;
 
 	for (auto it = piece_vector.begin(); it != piece_vector.end(); ++it) {
 		switch(tolower(it->symbol)) {
@@ -108,42 +118,42 @@ void Board::parse_legal_moves() {
 			break;
 		case 'p':
 			if (it->color == 'w') {
-				// If pawn is on its original place it can move 2 tiles
-				if (it->y == 6) {
-					walk_board(legal_moves, *it, -1, 0, 2);
-				}
-				else {
-					walk_board(legal_moves, *it, -1, 0, 1);
-				}
-				// Check for capture
-				if (board[it->y - 1][it->x - 1] != '0' && isupper(board[it->y - 1][it->x - 1])) {
-					Move m(it->x, it->y, it->x - 1, it->y - 1, true, it->symbol);
-					legal_moves.push_back(m);
-				}
-				else if (board[it->y - 1][it->x + 1] != '0' && isupper(board[it->y - 1][it->x + 1])) {
-					Move m(it->x, it->y, it->x + 1, it->y - 1, true, it->symbol);
-					legal_moves.push_back(m);
-				}
+				walk_pawn(legal_moves, *it, -1);
 			}
 			else {
-				if (it->y == 1) {
-				  walk_board(legal_moves, *it, 1, 0, 2);
-				}
-				else {
-					walk_board(legal_moves, *it, 1, 0, 1);
-				}
-				if (board[it->y + 1][it->x - 1] != '0' && islower(board[it->y + 1][it->x - 1])) {
-					Move m(it->x, it->y, it->x - 1, it->y + 1, true, it->symbol);
-					legal_moves.push_back(m);
-				}
-				else if (board[it->y - 1][it->x + 1] != '0' && islower(board[it->y + 1][it->x + 1])) {
-					Move m(it->x, it->y, it->x + 1, it->y + 1, true, it->symbol);
-					legal_moves.push_back(m);
-				}
+				walk_pawn(legal_moves, *it, 1);
 			}
 			break;
 		default:
 			throw std::domain_error("Unknown piece symbol");
+		}
+	}
+}
+
+void Board::walk_pawn(vector<Move>& move_vec, const Piece& p, int dir) {
+	// If pawn is on its original place it can move 2 tiles
+	if ((p.y == 6 && dir == -1) || (p.y == 1 && dir == 1)) {
+		walk_board(legal_moves, p, dir, 0, 2);
+	}
+	else {
+		walk_board(legal_moves, p, dir, 0, 1);
+	}
+
+	// Check for captures
+	if (!(p.y + dir > 7 || p.y + dir < 0 || p.x - 1 > 7 || p.x -1 < 0)) {
+		if (board[p.y + dir][p.x - 1] != '0' &&
+				((p.color == 'w' && isupper(board[p.y + dir][p.x - 1])) ||
+				 (p.color == 'b' && islower(board[p.y + dir][p.x - 1])))) {
+			Move m(p.x, p.y, p.x - 1, p.y + dir, true, p.symbol);
+			legal_moves.push_back(m);
+		}
+	}
+	if (!(p.y + dir > 7 || p.y + dir < 0 || p.x + 1 > 7 || p.x + 1 < 0)) {
+		if (board[p.y + dir][p.x + 1] != '0' &&
+				((p.color == 'w' && isupper(board[p.y + dir][p.x + 1])) ||
+				 (p.color == 'b' && islower(board[p.y + dir][p.x + 1])))) {
+			Move m(p.x, p.y, p.x + 1, p.y + dir, true, p.symbol);
+			legal_moves.push_back(m);
 		}
 	}
 }
@@ -209,8 +219,8 @@ void Board::move_piece(const Move& m) {
 		}
 	}
 
-	// Check if move puts board other side in check
-	parse_legal_moves();
+	// Check if move puts board other side in check, parse legal moves for the same side
+	parse_legal_moves(next_move);
 	check = is_check(target_vec, legal_moves);
 
 	// Move piece on board
@@ -221,12 +231,10 @@ void Board::move_piece(const Move& m) {
 	next_move = (next_move == 'w') ? 'b' : 'w';
 
 	// Generate new legal moves list
-	parse_legal_moves();
+	parse_legal_moves(next_move);
 	if (check) {
 		// Check for checkmate
-		auto fml = legal_moves;
-		checkmate = is_checkmate(board, next_move, check, fml);
-		legal_moves = fml;
+		checkmate = is_checkmate(board, next_move, legal_moves);
 	}
 }
 
@@ -245,10 +253,10 @@ bool piece_is_king(const Piece& p) {
 	return (tolower(p.symbol) == 'k');
 }
 
-bool is_checkmate(const array<array<char, 8>, 8>& b, char nm, bool c, vector<Move>& leg_moves) {
+bool is_checkmate(const array<array<char, 8>, 8>& b, char nm, vector<Move>& leg_moves) {
 	// TODO fix this, if other side also has check sketchy stuff will happen
 	for (auto it = leg_moves.begin(); it != leg_moves.end();) {
-		Board tmp_board(b, nm, c);
+		Board tmp_board(b, nm, true);
 		tmp_board.move_piece(*it);
 		if (is_check(tmp_board.get_next_move() == 'w' ? tmp_board.get_black_pieces() :
 								 tmp_board.get_white_pieces(), tmp_board.get_legal_moves())){

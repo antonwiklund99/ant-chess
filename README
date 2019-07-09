@@ -1,15 +1,18 @@
 TODOS:
-* Change board.legal_moves to a list instead of vector (no random accessing,
-  just inserting and deleting), black/white_pieces too??
 * Fix is_checkmate function if both sides have check
-* Replace switch in parse_legal_moves with polymorphic piece class instead??
-* Add member variable for king position for board?? (so you dont need to search
-	piece vector for king each time you want to know if it is check)
 * Add to move piece function so you cant make a move that will put your king in check
+* Make checks for board constructors arguments only two of each piece except pawns etc.
+* Finish unit tests for board class
+* Write tests for piece class
+* Write tests for move class
+
+NICE-TO-HAVE:
+* Change board.legal_moves to a list instead of vector (no random accessing,
+  just inserting and deleting), black/white_pieces too?
 * Add enums/typedef instead of char and ints for some variables (move.piece, board.next_move,
 	piece.symbol, piece.color etc.)
-* Bug where pawn cant capture other pawn if it hasnt moved
-* Bug a3-a4
-			a3xx4 // Capture its own piece?
-			b2-b3
-* Start writing tests
+
+MAYBE-ADD:
+* Replace switch in parse_legal_moves with polymorphic piece class instead
+* Add member variable for king position for board (so you dont need to search
+	piece vector for king each time you want to know if it is check)

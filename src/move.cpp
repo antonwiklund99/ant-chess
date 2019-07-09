@@ -3,11 +3,13 @@
 #include <string>
 #include <cctype>
 #include <algorithm>
+#include <stdexcept>
 using std::string;
 using std::islower;
 using std::find;
 using std::tolower;
 using std::to_string;
+using std::domain_error;
 
 // Move constructor from long algebraic chess move notation
 // format = [piece, except pawn][cordinate from][x if capture][cordinate to]
@@ -30,11 +32,29 @@ Move::Move(string s, char turn) {
 	from_y = s[index + 1] - '0';
 	to_x = letter_to_index(s[index + 3]);
 	to_y = s[index + 4] - '0';
+
+	// Run checks on values
+	!(from_x >= 0 && from_x < 8) ? throw domain_error("from_x is not withing range 0-7") : NULL ;
+	!(from_y >= 0 && from_y < 8) ? throw domain_error("from_y is not withing range 0-7") : NULL ;
+	!(to_x >= 0 && to_x < 8) ? throw domain_error("to_x is not withing range 0-7") : NULL ;
+	!(to_y >= 0 && to_y < 8) ? throw domain_error("to_y is not withing range 0-7") : NULL ;
+	string validLetters = "KQBNRP";
+	(find(validLetters.begin(), validLetters.end(), toupper(piece)) == validLetters.end()) ?
+		throw domain_error("Piece symbol is not valid") : NULL ;
 }
 
 // Move constructor given all values
 Move::Move(int fx, int fy, int tx, int ty, bool x, char p):
-		from_x(fx), from_y(fy), to_x(tx), to_y(ty), capture(x), piece(p) {}
+		from_x(fx), from_y(fy), to_x(tx), to_y(ty), capture(x), piece(p) {
+	// Run checks on values
+	!(from_x >= 0 && from_x < 8) ? throw domain_error("from_x is not withing range 0-7") : NULL ;
+	!(from_y >= 0 && from_y < 8) ? throw domain_error("from_y is not withing range 0-7") : NULL ;
+	!(to_x >= 0 && to_x < 8) ? throw domain_error("to_x is not withing range 0-7") : NULL ;
+	!(to_y >= 0 && to_y < 8) ? throw domain_error("to_y is not withing range 0-7") : NULL ;
+	string validLetters = "KQBNRP";
+	(find(validLetters.begin(), validLetters.end(), toupper(piece)) == validLetters.end()) ?
+		throw domain_error("Piece symbol is not valid") : NULL ;
+}
 
 bool operator== (const Move& lhs, const Move& rhs) {
 	return (lhs.from_x == rhs.from_x && lhs.to_x == rhs.to_x && lhs.from_y == rhs.from_y &&
@@ -64,9 +84,8 @@ int letter_to_index(char c) {
 	case 'f': return 5;
 	case 'g': return 6;
 	case 'h': return 7;
-	default: break;
+	default: throw domain_error("Letter is not a valid index");
 	}
-	return -1;
 }
 
 char index_to_letter(int i) {
@@ -79,7 +98,6 @@ char index_to_letter(int i) {
 	case 5: return 'f';
 	case 6: return 'g';
 	case 7: return 'h';
-	default: break;
+	default: throw domain_error("Index is not a valid number");
 	}
-	return 'x';
 }

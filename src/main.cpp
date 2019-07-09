@@ -1,4 +1,3 @@
-
 #include "board.h"
 #include "piece.h"
 #include "move.h"
@@ -11,20 +10,24 @@ using std::cout;
 using std::endl;
 
 int main(int argc, char *argv[]) {
-	Board board;
+	std::array<std::array<char, 8>, 8> checkmatedBoard = {{
+																												 {'0','r','0','0','0','K','0','0'},
+																												 {'R','0','0','0','0','P','0','0'},
+																												 {'0','0','0','0','0','q','0','P'},
+																												 {'P','0','0','0','0','P','0','0'},
+																												 {'p','B','n','0','0','0','0','0'},
+																												 {'0','p','0','0','0','r','0','0'},
+																												 {'0','0','0','0','0','p','k','p'},
+																												 {'0','0','0','0','0','0','0','0'}
+																												 }};
+	Board board(checkmatedBoard, 'b');
 	cout << board;
-	/*
-	vector<Piece> bp = board.get_black_pieces();
-	vector<Piece> wp = board.get_white_pieces();
-	for (auto it = bp.begin(); it != bp.end(); ++it) {
-		cout << it->symbol << " " << it->y << " " << it->x << "\n";
+	auto moves = board.get_legal_moves();
+	for (auto it = moves.begin(); it != moves.end(); ++it) {
+		cout << (*it).notation() << endl;
 	}
-	cout << "\n";
-	for (auto it = wp.begin(); it != wp.end(); ++it) {
-		cout << it->symbol << " " << it->y << " " << it->x << "\n";
-		}*/
 	std::string m;
-	do {
+	while(!board.board_is_checkmate()) {
 		cout << "[Piece cordinate from(xy)][x/-][cordinate to]" << endl;
 		std::cin >> m;
 
@@ -38,15 +41,14 @@ int main(int argc, char *argv[]) {
 
 		auto moves = board.get_legal_moves();
 		cout << "legal moves:" << endl;
-		for (auto it = moves.begin(); it != moves.end(); ++it) { /*
-			cout << "From:" << it->from_x << " " << it->from_y << " " <<
-			it->to_x << " " << it->to_y << " Piece: " << it->piece << '\n';*/
+		for (auto it = moves.begin(); it != moves.end(); ++it) {
 			cout << (*it).notation() << endl;
 		}
 		cout << "next move = " << board.get_next_move() << "\n";
 		cout << "check = " << board.board_is_check() << '\n';
 		cout << "checkmate = " << board.board_is_checkmate() << '\n';
 		cout << board << "\n";
-	} while(!board.board_is_checkmate());
+	}
+	cout << "Checkmate, " << board.get_next_move() << " lost" << endl;
 	return 0;
 }

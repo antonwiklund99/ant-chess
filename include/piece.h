@@ -9,4 +9,6 @@ struct Piece {
 };
 
 bool operator== (const Piece&, const Piece&);
+bool operator< (const Piece&, const Piece&);
+int pieceValue(char);
 #endif

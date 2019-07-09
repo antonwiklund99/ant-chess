@@ -14,9 +14,11 @@ class Board {
 
 	// Create board given board array, next move and check
 	Board(std::array<std::array<char, 8>, 8>, char, bool);
+	Board(std::array<std::array<char, 8>, 8>, char);
 
 	// Cout board like a grid
 	friend std::ostream& operator<< (std::ostream& out, const Board& obj);
+	friend bool is_checkmate(const std::array<std::array<char, 8>, 8>&, char, std::vector<Move>&);
 
 	// Move piece
 	void move_piece(const Move&);
@@ -40,11 +42,13 @@ class Board {
 	std::vector<Piece> black_pieces;
 	std::vector<Piece> white_pieces;
 
-	void parse_legal_moves();
+	void parse_legal_moves(char);
+	void walk_pawn(std::vector<Move>&, const Piece&, int);
 	void walk_board(std::vector<Move>&, const Piece&, int, int, int);
 };
 
+// Args: Piece vector for target (not next_move) team and vector of legal moves
 bool is_check(const std::vector<Piece>&, const std::vector<Move>&);
 bool piece_is_king(const Piece&);
-bool is_checkmate(const std::array<std::array<char, 8>, 8>&, char, bool, std::vector<Move>&);
+bool is_checkmate(const std::array<std::array<char, 8>, 8>&, char, std::vector<Move>&);
 #endif
