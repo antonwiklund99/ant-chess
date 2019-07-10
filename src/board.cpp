@@ -37,10 +37,12 @@ Board::Board(array<array<char, 8>, 8> b, char nm) :
 	board(b), next_move(nm) {
 	get_pieces_from_board(black_pieces, white_pieces);
 	parse_legal_moves((nm == 'b') ? 'w' : 'b');
+
 	// Want to check if current color is in check/checkmate
 	check = is_check((nm == 'b') ? black_pieces: white_pieces, legal_moves);
 	parse_legal_moves(next_move);
-	checkmate = (check) ? is_checkmate(b, next_move, legal_moves) : false;
+	clean_checked_moves(board, next_move, legal_moves);
+	checkmate = (legal_moves.size() == 0);
 }
 
 Board::Board(array<array<char, 8>, 8> b, char nm, bool c) :
@@ -192,7 +194,7 @@ void Board::walk_board(vector<Move>& move_vec, const Piece& p, int y_dir, int x_
 }
 
 // Do Move m
-void Board::move_piece(const Move& m) {
+void Board::move_piece(const Move& m, bool do_clean) {
 	// Check if move is legal
 	if (!(find(legal_moves.begin(), legal_moves.end(), m) != legal_moves.end())) {
 		throw std::invalid_argument("Move is not a legal move");
@@ -232,10 +234,12 @@ void Board::move_piece(const Move& m) {
 
 	// Generate new legal moves list
 	parse_legal_moves(next_move);
-	if (check) {
-		// Check for checkmate
-		checkmate = is_checkmate(board, next_move, legal_moves);
+
+	// Check for checkmate
+	if (do_clean) {
+		clean_checked_moves(board, next_move, legal_moves);
 	}
+	checkmate = (legal_moves.size() == 0);
 }
 
 bool is_check(const vector<Piece>& target_vec, const vector<Move>& move_vec) {
@@ -253,11 +257,11 @@ bool piece_is_king(const Piece& p) {
 	return (tolower(p.symbol) == 'k');
 }
 
-bool is_checkmate(const array<array<char, 8>, 8>& b, char nm, vector<Move>& leg_moves) {
+void clean_checked_moves(const array<array<char, 8>, 8>& b, char nm, vector<Move>& leg_moves) {
 	// TODO fix this, if other side also has check sketchy stuff will happen
 	for (auto it = leg_moves.begin(); it != leg_moves.end();) {
 		Board tmp_board(b, nm, true);
-		tmp_board.move_piece(*it);
+		tmp_board.move_piece(*it, false);
 		if (is_check(tmp_board.get_next_move() == 'w' ? tmp_board.get_black_pieces() :
 								 tmp_board.get_white_pieces(), tmp_board.get_legal_moves())){
 			it = leg_moves.erase(it);
@@ -265,12 +269,6 @@ bool is_checkmate(const array<array<char, 8>, 8>& b, char nm, vector<Move>& leg_
 		else {
 			++it;
 		}
-	}
-	if (leg_moves.size() == 0) {
-		return true;
-	}
-	else {
-		return false;
 	}
 }
 

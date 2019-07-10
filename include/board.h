@@ -12,16 +12,18 @@ class Board {
 	// Constructor creates chess board with starting pieces
 	Board();
 
-	// Create board given board array, next move and check
-	Board(std::array<std::array<char, 8>, 8>, char, bool);
+	// Create board given board array and next move
 	Board(std::array<std::array<char, 8>, 8>, char);
 
 	// Cout board like a grid
 	friend std::ostream& operator<< (std::ostream& out, const Board& obj);
-	friend bool is_checkmate(const std::array<std::array<char, 8>, 8>&, char, std::vector<Move>&);
+
+	friend void clean_checked_moves(const std::array<std::array<char, 8>, 8>&, char,
+																	std::vector<Move>&);
 
 	// Move piece
-	void move_piece(const Move&);
+	void move_piece(const Move& m) { move_piece(m, true); }
+	void move_piece(const Move&, bool);
 
 	// Assessors
 	char get_next_move() { return next_move; }
@@ -32,6 +34,9 @@ class Board {
 	std::vector<Move>  get_legal_moves()  { return legal_moves;  }
 
  private:
+	// Constructor only used by clean_checked_moves
+	Board(std::array<std::array<char, 8>, 8>, char, bool);
+
 	std::array<std::array<char, 8>, 8> board;
 	char next_move;
 	std::vector<Move> legal_moves;
@@ -50,5 +55,5 @@ class Board {
 // Args: Piece vector for target (not next_move) team and vector of legal moves
 bool is_check(const std::vector<Piece>&, const std::vector<Move>&);
 bool piece_is_king(const Piece&);
-bool is_checkmate(const std::array<std::array<char, 8>, 8>&, char, std::vector<Move>&);
+void clean_checked_moves(const std::array<std::array<char, 8>, 8>&, char, std::vector<Move>&);
 #endif

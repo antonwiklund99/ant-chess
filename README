@@ -1,16 +1,20 @@
 TODOS:
-* Fix is_checkmate function if both sides have check
-* Add to move piece function so you cant make a move that will put your king in check
 * Make checks for board constructors arguments only two of each piece except pawns etc.
-* Finish unit tests for board class
+* Add ability to castle
+* Add en passant
+* Add pawn promotion
+* Finish and fix unit tests for board class
 * Write tests for piece class
 * Write tests for move class
 
-NICE-TO-HAVE:
+REFACTORING:
 * Change board.legal_moves to a list instead of vector (no random accessing,
   just inserting and deleting), black/white_pieces too?
 * Add enums/typedef instead of char and ints for some variables (move.piece, board.next_move,
 	piece.symbol, piece.color etc.)
+* Change variable and function names to thisName from this_name
+* Make parse_legal_moves do what clean_checked_moves does or find some cleaner way to remove
+	moves that will put side in check
 
 MAYBE-ADD:
 * Replace switch in parse_legal_moves with polymorphic piece class instead
