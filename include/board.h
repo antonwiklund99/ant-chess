@@ -26,12 +26,14 @@ class Board {
 	void move_piece(const Move&, bool);
 
 	// Assessors
-	char get_next_move() { return next_move; }
-	bool board_is_check() { return check; }
-	bool board_is_checkmate() { return checkmate; }
-	std::vector<Piece> get_black_pieces() { return black_pieces; }
-	std::vector<Piece> get_white_pieces() { return white_pieces; }
-	std::vector<Move>  get_legal_moves()  { return legal_moves;  }
+	char get_next_move() const { return next_move; }
+	bool board_is_check() const { return check; }
+	bool board_is_checkmate() const { return checkmate; }
+	bool board_is_stalemate() const { return stalemate; }
+	int get_result() const { return result; }
+	std::vector<Piece> get_black_pieces() const { return black_pieces; }
+	std::vector<Piece> get_white_pieces() const { return white_pieces; }
+	std::vector<Move>  get_legal_moves()  const { return legal_moves;  }
 
  private:
 	// Constructor only used by clean_checked_moves
@@ -42,6 +44,9 @@ class Board {
 	std::vector<Move> legal_moves;
 	bool check;
 	bool checkmate;
+	bool stalemate;
+	// 1 = white win 0 = draw -1 = black win empty = ongoing
+	int result;
 
 	void get_pieces_from_board(std::vector<Piece>&, std::vector<Piece>&);
 	std::vector<Piece> black_pieces;

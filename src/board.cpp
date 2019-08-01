@@ -27,7 +27,7 @@ Board::Board() : board {{
 												{'0', '0', '0', '0', '0', '0', '0', '0'},
 												{'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
 												{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'}
-												 }}, next_move('w'), check(false), checkmate(false) {
+												 }}, next_move('w'), check(false), checkmate(false), stalemate(false) {
 	get_pieces_from_board(black_pieces, white_pieces);
 	parse_legal_moves(next_move);
 }
@@ -42,7 +42,16 @@ Board::Board(array<array<char, 8>, 8> b, char nm) :
 	check = is_check((nm == 'b') ? black_pieces: white_pieces, legal_moves);
 	parse_legal_moves(next_move);
 	clean_checked_moves(board, next_move, legal_moves);
-	checkmate = (legal_moves.size() == 0);
+	checkmate = (check && legal_moves.size() == 0);
+	stalemate = (!check && legal_moves.size() == 0) ||
+          		(black_pieces.size() == 1 && white_pieces.size() == 1);
+
+	if (stalemate) {
+		result = 0;
+	}
+	else if (checkmate){
+		result = (next_move == 'w') ? -1 : 1;
+	}
 }
 
 Board::Board(array<array<char, 8>, 8> b, char nm, bool c) :
@@ -90,7 +99,7 @@ void Board::parse_legal_moves(char side) {
 			walk_board(legal_moves, *it, 1, 2, 1);
 			walk_board(legal_moves, *it, -1, 2, 1);
 			walk_board(legal_moves, *it, 1, -2, 1);
-			walk_board(legal_moves, *it, -1, 2, 1);
+			walk_board(legal_moves, *it, -1, -2, 1);
 			break;
 		case 'b':
 			walk_board(legal_moves, *it, 1, 1, 8);
@@ -239,7 +248,18 @@ void Board::move_piece(const Move& m, bool do_clean) {
 	if (do_clean) {
 		clean_checked_moves(board, next_move, legal_moves);
 	}
-	checkmate = (legal_moves.size() == 0);
+
+	checkmate = (check && legal_moves.size() == 0);
+	stalemate = (!check && legal_moves.size() == 0) ||
+          		(black_pieces.size() == 1 && white_pieces.size() == 1);
+
+	if (stalemate) {
+		result = 0;
+	}
+	else if (checkmate) {
+		result = (next_move == 'w') ? -1 : 1;
+	}
+
 }
 
 bool is_check(const vector<Piece>& target_vec, const vector<Move>& move_vec) {

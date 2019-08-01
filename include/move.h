@@ -12,7 +12,7 @@ struct Move {
 	Move(std::string, char);
   Move(int, int, int, int, bool, char);
 
-	std::string notation();
+	std::string notation() const;
 };
 
 bool operator== (const Move&, const Move&);

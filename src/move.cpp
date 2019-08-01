@@ -40,7 +40,7 @@ Move::Move(string s, char turn) {
 	!(to_y >= 0 && to_y < 8) ? throw domain_error("to_y is not withing range 0-7") : NULL ;
 	string validLetters = "KQBNRP";
 	(find(validLetters.begin(), validLetters.end(), toupper(piece)) == validLetters.end()) ?
-		throw domain_error("Piece symbol is not valid") : NULL ;
+		throw domain_error("Move constructor: Piece symbol is not valid") : NULL ;
 }
 
 // Move constructor given all values
@@ -53,7 +53,7 @@ Move::Move(int fx, int fy, int tx, int ty, bool x, char p):
 	!(to_y >= 0 && to_y < 8) ? throw domain_error("to_y is not withing range 0-7") : NULL ;
 	string validLetters = "KQBNRP";
 	(find(validLetters.begin(), validLetters.end(), toupper(piece)) == validLetters.end()) ?
-		throw domain_error("Piece symbol is not valid") : NULL ;
+		throw domain_error("Move constructor: Piece symbol is not valid") : NULL ;
 }
 
 bool operator== (const Move& lhs, const Move& rhs) {
@@ -61,7 +61,7 @@ bool operator== (const Move& lhs, const Move& rhs) {
 					lhs.to_y == rhs.to_y && lhs.piece == rhs.piece && lhs.capture == rhs.capture);
 }
 
-string Move::notation() {
+string Move::notation() const {
 	string out;
 	if (toupper(piece) != 'P') {
 		out.push_back(toupper(piece));

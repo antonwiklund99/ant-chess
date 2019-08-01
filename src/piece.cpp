@@ -3,6 +3,7 @@
 #include <string>
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 using std::domain_error;
 using std::string;
 using std::find;
@@ -10,7 +11,7 @@ using std::find;
 Piece::Piece(char c, int ypos, int xpos) {
 	string validLetters = "KQBNRP";
 	(find(validLetters.begin(), validLetters.end(), toupper(c)) == validLetters.end()) ?
-		throw domain_error("Piece symbol is not valid") : NULL ;
+		throw domain_error("Unable to construct piece, symbol not valid") : NULL;
 	symbol = c;
 
 	!(ypos >= 0 && ypos < 8) ? throw domain_error("Piece y is not within range 0-7") : NULL;
@@ -36,7 +37,6 @@ int pieceValue(char c) {
 	case 'r' : return 5;
 	case 'q' : return 9;
 	case 'k' : return 10;
-	default  : break;
+	default  : throw domain_error("Cannot convert piece char to value, invalid char");
 	}
-	return -1;
 }
