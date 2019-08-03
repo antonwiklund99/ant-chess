@@ -35,7 +35,7 @@ Move computeBestMove(const Board& startBoard) {
 	string optimalMove;
 	srand(time(NULL));
 	for (int i = 0; i < NUMBER_OF_SEARCH_ITERATIONS; i++) {
-		std::cout << "Search number: " << i << std::endl;
+		if (!(i%5)) std::cout << "Search number: " << i << std::endl;
 		b = startBoard;
 		totalMoves = 0;
 

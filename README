@@ -3,9 +3,7 @@ TODOS:
 * Add ability to castle
 * Add en passant
 * Add pawn promotion
-* Finish and fix unit tests for board class
-* Write tests for piece class
-* Write tests for move class
+* Add all stalemate/loss conditions
 
 REFACTORING:
 * Change board.legal_moves to a list instead of vector (no random accessing,

@@ -41,7 +41,7 @@ Board::Board(array<array<char, 8>, 8> b, char nm) :
 	// Want to check if current color is in check/checkmate
 	check = is_check((nm == 'b') ? black_pieces: white_pieces, legal_moves);
 	parse_legal_moves(next_move);
-	clean_checked_moves(board, next_move, legal_moves);
+	clean_checked_moves(*this);
 	checkmate = (check && legal_moves.size() == 0);
 	stalemate = (!check && legal_moves.size() == 0) ||
           		(black_pieces.size() == 1 && white_pieces.size() == 1);
@@ -246,7 +246,7 @@ void Board::move_piece(const Move& m, bool do_clean) {
 
 	// Check for checkmate
 	if (do_clean) {
-		clean_checked_moves(board, next_move, legal_moves);
+		clean_checked_moves(*this);
 	}
 
 	checkmate = (check && legal_moves.size() == 0);
@@ -259,7 +259,6 @@ void Board::move_piece(const Move& m, bool do_clean) {
 	else if (checkmate) {
 		result = (next_move == 'w') ? -1 : 1;
 	}
-
 }
 
 bool is_check(const vector<Piece>& target_vec, const vector<Move>& move_vec) {
@@ -277,14 +276,16 @@ bool piece_is_king(const Piece& p) {
 	return (tolower(p.symbol) == 'k');
 }
 
-void clean_checked_moves(const array<array<char, 8>, 8>& b, char nm, vector<Move>& leg_moves) {
-	// TODO fix this, if other side also has check sketchy stuff will happen
-	for (auto it = leg_moves.begin(); it != leg_moves.end();) {
-		Board tmp_board(b, nm, true);
-		tmp_board.move_piece(*it, false);
-		if (is_check(tmp_board.get_next_move() == 'w' ? tmp_board.get_black_pieces() :
-								 tmp_board.get_white_pieces(), tmp_board.get_legal_moves())){
-			it = leg_moves.erase(it);
+void clean_checked_moves(Board& startBoard) {
+	Board tmpBoard = startBoard;
+	for (auto it = startBoard.legal_moves.begin(); it != startBoard.legal_moves.end();) {
+		tmpBoard = startBoard;
+
+		tmpBoard.move_piece(*it, false);
+
+		if (is_check(tmpBoard.next_move == 'w' ? tmpBoard.black_pieces :
+								 tmpBoard.white_pieces, tmpBoard.legal_moves)){
+			it = startBoard.legal_moves.erase(it);
 		}
 		else {
 			++it;

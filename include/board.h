@@ -18,8 +18,7 @@ class Board {
 	// Cout board like a grid
 	friend std::ostream& operator<< (std::ostream& out, const Board& obj);
 
-	friend void clean_checked_moves(const std::array<std::array<char, 8>, 8>&, char,
-																	std::vector<Move>&);
+	friend void clean_checked_moves(Board&);
 
 	// Move piece
 	void move_piece(const Move& m) { move_piece(m, true); }
@@ -60,5 +59,5 @@ class Board {
 // Args: Piece vector for target (not next_move) team and vector of legal moves
 bool is_check(const std::vector<Piece>&, const std::vector<Move>&);
 bool piece_is_king(const Piece&);
-void clean_checked_moves(const std::array<std::array<char, 8>, 8>&, char, std::vector<Move>&);
+void clean_checked_moves(Board&);
 #endif
