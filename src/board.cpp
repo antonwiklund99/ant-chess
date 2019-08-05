@@ -86,53 +86,53 @@ void Board::parse_legal_moves(char side) {
 	for (auto it = piece_vector.begin(); it != piece_vector.end(); ++it) {
 		switch(tolower(it->symbol)) {
 		case 'r':
-			walk_board(legal_moves, *it, 1, 0, 8);
-			walk_board(legal_moves, *it, -1, 0, 8);
-			walk_board(legal_moves, *it, 0, 1, 8);
-			walk_board(legal_moves, *it, 0, -1, 8);
+			walk_board(*it, 1, 0, 8);
+			walk_board(*it, -1, 0, 8);
+			walk_board(*it, 0, 1, 8);
+			walk_board(*it, 0, -1, 8);
 			break;
 		case 'n':
-			walk_board(legal_moves, *it, 2, 1, 1);
-			walk_board(legal_moves, *it, 2, -1, 1);
-			walk_board(legal_moves, *it, -2, 1, 1);
-			walk_board(legal_moves, *it, -2, -1, 1);
-			walk_board(legal_moves, *it, 1, 2, 1);
-			walk_board(legal_moves, *it, -1, 2, 1);
-			walk_board(legal_moves, *it, 1, -2, 1);
-			walk_board(legal_moves, *it, -1, -2, 1);
+			walk_board(*it, 2, 1, 1);
+			walk_board(*it, 2, -1, 1);
+			walk_board(*it, -2, 1, 1);
+			walk_board(*it, -2, -1, 1);
+			walk_board(*it, 1, 2, 1);
+			walk_board(*it, -1, 2, 1);
+			walk_board(*it, 1, -2, 1);
+			walk_board(*it, -1, -2, 1);
 			break;
 		case 'b':
-			walk_board(legal_moves, *it, 1, 1, 8);
-			walk_board(legal_moves, *it, 1, -1, 8);
-			walk_board(legal_moves, *it, -1, 1, 8);
-			walk_board(legal_moves, *it, -1, -1, 8);
+			walk_board(*it, 1, 1, 8);
+			walk_board(*it, 1, -1, 8);
+			walk_board(*it, -1, 1, 8);
+			walk_board(*it, -1, -1, 8);
 			break;
 		case 'q':
-			walk_board(legal_moves, *it, 1, 1, 8);
-			walk_board(legal_moves, *it, 1, -1, 8);
-			walk_board(legal_moves, *it, -1, 1, 8);
-			walk_board(legal_moves, *it, -1, -1, 8);
-			walk_board(legal_moves, *it, 1, 0, 8);
-			walk_board(legal_moves, *it, -1, 0, 8);
-			walk_board(legal_moves, *it, 0, 1, 8);
-			walk_board(legal_moves, *it, 0, -1, 8);
+			walk_board(*it, 1, 1, 8);
+			walk_board(*it, 1, -1, 8);
+			walk_board(*it, -1, 1, 8);
+			walk_board(*it, -1, -1, 8);
+			walk_board(*it, 1, 0, 8);
+			walk_board(*it, -1, 0, 8);
+			walk_board(*it, 0, 1, 8);
+			walk_board(*it, 0, -1, 8);
 			break;
 		case 'k':
-			walk_board(legal_moves, *it, 1, 1, 1);
-			walk_board(legal_moves, *it, 1, -1, 1);
-			walk_board(legal_moves, *it, -1, 1, 1);
-			walk_board(legal_moves, *it, -1, -1, 1);
-			walk_board(legal_moves, *it, 1, 0, 1);
-			walk_board(legal_moves, *it, -1, 0, 1);
-			walk_board(legal_moves, *it, 0, 1, 1);
-			walk_board(legal_moves, *it, 0, -1, 1);
+			walk_board(*it, 1, 1, 1);
+			walk_board(*it, 1, -1, 1);
+			walk_board(*it, -1, 1, 1);
+			walk_board(*it, -1, -1, 1);
+			walk_board(*it, 1, 0, 1);
+			walk_board(*it, -1, 0, 1);
+			walk_board(*it, 0, 1, 1);
+			walk_board(*it, 0, -1, 1);
 			break;
 		case 'p':
 			if (it->color == 'w') {
-				walk_pawn(legal_moves, *it, -1);
+				walk_pawn(*it, -1);
 			}
 			else {
-				walk_pawn(legal_moves, *it, 1);
+				walk_pawn(*it, 1);
 			}
 			break;
 		default:
@@ -141,13 +141,13 @@ void Board::parse_legal_moves(char side) {
 	}
 }
 
-void Board::walk_pawn(vector<Move>& move_vec, const Piece& p, int dir) {
+void Board::walk_pawn(const Piece& p, int dir) {
 	// If pawn is on its original place it can move 2 tiles
 	if ((p.y == 6 && dir == -1) || (p.y == 1 && dir == 1)) {
-		walk_board(legal_moves, p, dir, 0, 2);
+		walk_board(p, dir, 0, 2);
 	}
 	else {
-		walk_board(legal_moves, p, dir, 0, 1);
+		walk_board(p, dir, 0, 1);
 	}
 
 	// Check for captures
@@ -155,35 +155,32 @@ void Board::walk_pawn(vector<Move>& move_vec, const Piece& p, int dir) {
 		if (board[p.y + dir][p.x - 1] != '0' &&
 				((p.color == 'w' && isupper(board[p.y + dir][p.x - 1])) ||
 				 (p.color == 'b' && islower(board[p.y + dir][p.x - 1])))) {
-			Move m(p.x, p.y, p.x - 1, p.y + dir, true, p.symbol);
-			legal_moves.push_back(m);
+			legal_moves.push_back(Move(p.x, p.y, p.x - 1, p.y + dir, true, p.symbol));
 		}
 	}
 	if (!(p.y + dir > 7 || p.y + dir < 0 || p.x + 1 > 7 || p.x + 1 < 0)) {
 		if (board[p.y + dir][p.x + 1] != '0' &&
 				((p.color == 'w' && isupper(board[p.y + dir][p.x + 1])) ||
 				 (p.color == 'b' && islower(board[p.y + dir][p.x + 1])))) {
-			Move m(p.x, p.y, p.x + 1, p.y + dir, true, p.symbol);
-			legal_moves.push_back(m);
+			legal_moves.push_back(Move(p.x, p.y, p.x + 1, p.y + dir, true, p.symbol));
 		}
 	}
 }
 
-// Walks the board in direction til it finds other piece or end of board, inserts each legal
-// move into referenced vector
-void Board::walk_board(vector<Move>& move_vec, const Piece& p, int y_dir, int x_dir, int cap) {
+/* Walks the piece in direction til it finds other piece, end of board or exceds moves cap,
+inserts each move into legal_moves vector */
+void Board::walk_board(const Piece& p, int y_dir, int x_dir, int cap) {
 	int new_xpos, new_ypos;
 	for (int n = 1; n != cap + 1; ++n) {
 		new_ypos = p.y + y_dir * n;
 		new_xpos = p.x + x_dir * n;
-		// Check if new pos legal_movesside board
+		// Check if pos is outside of board's edges
 		if (new_ypos > 7 || new_ypos < 0 || new_xpos > 7 || new_xpos < 0){
 			return;
 		}
 		// If move is on empty space, add move to vector
 		else if (board[new_ypos][new_xpos] == '0') {
-			Move m(p.x, p.y, new_xpos, new_ypos, false, p.symbol);
-			move_vec.push_back(m);
+			legal_moves.push_back(Move(p.x, p.y, new_xpos, new_ypos, false, p.symbol));
 		}
 		// Move is on piece
 		else {
@@ -194,8 +191,7 @@ void Board::walk_board(vector<Move>& move_vec, const Piece& p, int y_dir, int x_
 				return;
 			}
 			else {
-				Move m(p.x, p.y, new_xpos, new_ypos, true, p.symbol);
-				move_vec.push_back(m);
+				legal_moves.push_back(Move(p.x, p.y, new_xpos, new_ypos, true, p.symbol));
 				return;
 			}
 		}

@@ -53,8 +53,8 @@ class Board {
 	std::vector<Piece> white_pieces;
 
 	void parse_legal_moves(char);
-	void walk_pawn(std::vector<Move>&, const Piece&, int);
-	void walk_board(std::vector<Move>&, const Piece&, int, int, int);
+	void walk_pawn(const Piece&, int);
+	void walk_board(const Piece&, int, int, int);
 };
 
 // Args: Piece vector for target (not next_move) team and vector of legal moves
