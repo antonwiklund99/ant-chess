@@ -2,28 +2,22 @@
 #include "piece.h"
 #include "move.h"
 #include "mcts.h"
+#include "graphicshandler.h"
 #include <iostream>
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <SDL2/SDL.h>
 using std::vector;
 using std::cout;
 using std::endl;
 
 int main(int argc, char *argv[]) {
-	/*	std::array<std::array<char, 8>, 8> checkmatedBoard = {{
-																												 {'0','0','0','0','0','K','0','0'},
-																												 {'R','0','0','0','0','P','0','0'},
-																												 {'0','0','0','0','0','q','0','P'},
-																												 {'P','0','0','0','0','P','0','0'},
-																												 {'p','B','n','Q','0','0','0','0'},
-																												 {'0','p','0','0','0','r','0','0'},
-																												 {'0','0','0','0','0','p','k','p'},
-																												 {'0','0','0','0','0','0','0','0'}
-																												 }};*/
 	Board board;
 	std::string m;
+	Graphicshandler graphicshandler;
 	while(!board.board_is_checkmate() && !board.board_is_stalemate()) {
+		graphicshandler.update(board.get_board());
 		if (board.get_next_move() == 'w') {
 			cout << "next move = " << board.get_next_move() << "\n";
 			cout << "check = " << board.board_is_check() << '\n';
@@ -39,10 +33,13 @@ int main(int argc, char *argv[]) {
 
 			cout << "[Piece cordinate from(xy)][x/-][cordinate to]" << endl;
 			std::cin >> m;
+			if (m == "quit") {
+				graphicshandler.close();
+				return 0;
+			}
 
-
-			Move t(m, board.get_next_move());
 			try {
+				Move t(m, board.get_next_move());
 				board.move_piece(t);
 			}
 			catch(std::invalid_argument) {
@@ -55,5 +52,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	cout << "Checkmate, " << board.get_next_move() << " lost" << endl;
+	graphicshandler.close();
 	return 0;
 }

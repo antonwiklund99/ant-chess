@@ -15,7 +15,7 @@ using std::string;
 using std::pair;
 using std::sort;
 
-#define NUMBER_OF_SEARCH_ITERATIONS 200
+#define NUMBER_OF_SEARCH_ITERATIONS 1000
 #define MAX_SEARCH_DEPTH 100
 
 Node::Node(Node* p) {
@@ -35,7 +35,7 @@ Move computeBestMove(const Board& startBoard) {
 	string optimalMove;
 	srand(time(NULL));
 	for (int i = 0; i < NUMBER_OF_SEARCH_ITERATIONS; i++) {
-		if (!(i%5)) std::cout << "Search number: " << i << std::endl;
+		if (!(i%10)) std::cout << "Search number: " << i << std::endl;
 		b = startBoard;
 		totalMoves = 0;
 
@@ -50,12 +50,18 @@ Move computeBestMove(const Board& startBoard) {
 			}
 			// If all nodes have had full playouts, run nodes through uct and chose most promising one
 			else if (headptr->children.size() == m.size()) {
-				double bestScore = 0, ret;
-				for (auto it = headptr->children.begin(); it != headptr->children.end(); it++) {
-					ret = uct(it->second.wins, it->second.simulations, headptr->simulations);
-					if (ret > bestScore) {
-						bestScore = ret;
-						optimalMove = it->first;
+				if (headptr->children.size() == 1) {
+					optimalMove = headptr->children.begin()->first;
+				}
+				else {
+					double bestScore = 0, ret;
+					for (auto it = headptr->children.begin(); it != headptr->children.end(); ++it) {
+						ret = uct(it->second.wins, it->second.simulations, headptr->simulations);
+						if (ret > bestScore) {
+							bestScore = ret;
+							optimalMove = it->first;
+							//std::cout << "Move: " << optimalMove << "m.size() = " << m.size() << std::endl;
+						}
 					}
 				}
 			}

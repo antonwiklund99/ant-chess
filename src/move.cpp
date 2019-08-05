@@ -15,6 +15,8 @@ using std::domain_error;
 // format = [piece, except pawn][cordinate from][x if capture][cordinate to]
 Move::Move(string s, char turn) {
 	bool is_pawn = islower(s[0]);
+	if (is_pawn && s.size() == 6)
+		throw std::invalid_argument("first letter of notation is lower");
 	capture = find(s.begin(), s.end(), 'x') != s.end();
 	int index = 1;
 	char p;
@@ -29,9 +31,9 @@ Move::Move(string s, char turn) {
 
 	piece = (turn == 'w') ? tolower(p) : p;
 	from_x = letter_to_index(s[index]);
-	from_y = s[index + 1] - '0';
+	from_y = 8 - (s[index + 1] - '0');
 	to_x = letter_to_index(s[index + 3]);
-	to_y = s[index + 4] - '0';
+	to_y = 8 - (s[index + 4] - '0');
 
 	// Run checks on values
 	!(from_x >= 0 && from_x < 8) ? throw domain_error("from_x is not withing range 0-7") : NULL ;
@@ -67,10 +69,10 @@ string Move::notation() const {
 		out.push_back(toupper(piece));
 	}
 	out.push_back(index_to_letter(from_x));
-	out += to_string(from_y);
+	out += to_string(8 - from_y);
 	out.push_back((capture) ? 'x' : '-');
 	out.push_back(index_to_letter(to_x));
-	out += to_string(to_y);
+	out += to_string(8 - to_y);
 	return out;
 }
 

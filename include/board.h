@@ -29,6 +29,7 @@ class Board {
 	bool board_is_check() const { return check; }
 	bool board_is_checkmate() const { return checkmate; }
 	bool board_is_stalemate() const { return stalemate; }
+	std::array<std::array<char, 8>, 8> get_board() const { return board; }
 	int get_result() const { return result; }
 	std::vector<Piece> get_black_pieces() const { return black_pieces; }
 	std::vector<Piece> get_white_pieces() const { return white_pieces; }
