@@ -10,7 +10,7 @@
 class Node {
  public:
 	int simulations;
-	int wins;
+	int score;
 	std::map<std::string, Node> children;
 	Node* parent;
 

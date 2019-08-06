@@ -20,7 +20,7 @@ using std::sort;
 
 Node::Node(Node* p) {
 	simulations = 0;
-	wins = 0;
+	score = 0;
 	parent = p;
 }
 
@@ -29,7 +29,7 @@ Move computeBestMove(const Board& startBoard) {
 	Tree tree;
 	Node *headptr = &tree.root;
 
-	int r, totalMoves, wasWin;
+	int r, totalMoves, wasWin, wasDraw;
 	Board b;
 	vector<Move> m;
 	string optimalMove;
@@ -56,7 +56,7 @@ Move computeBestMove(const Board& startBoard) {
 				else {
 					double bestScore = 0, ret;
 					for (auto it = headptr->children.begin(); it != headptr->children.end(); ++it) {
-						ret = uct(it->second.wins, it->second.simulations, headptr->simulations);
+						ret = uct(it->second.score, it->second.simulations, headptr->simulations);
 						if (ret > bestScore) {
 							bestScore = ret;
 							optimalMove = it->first;
@@ -80,12 +80,13 @@ Move computeBestMove(const Board& startBoard) {
 
 			if (b.board_is_checkmate() || b.board_is_stalemate() || totalMoves > MAX_SEARCH_DEPTH) {
 				// Get if end was win or loss
-				wasWin = (b.board_is_checkmate() && (b.get_next_move() != startBoard.get_next_move()));
+				wasWin = 2*(b.board_is_checkmate() && (b.get_next_move() != startBoard.get_next_move()));
+        wasDraw = b.board_is_stalemate();
 
 				// Traverse back through tree untill reaching root node
 				while (headptr != &tree.root) {
 					++headptr->simulations;
-					headptr->wins += wasWin;
+					headptr->score += wasWin + wasDraw;
 					headptr = headptr->parent;
 				}
 
@@ -107,16 +108,16 @@ Move computeBestMove(const Board& startBoard) {
 	for (auto it = tree.root.children.begin(); it != tree.root.children.end(); ++it) {
 
 		std::cout << "Move = " << it->first  << ", simulations = " << it->second.simulations
-							<< ", wins = " << it->second.wins << ", win/sim = " <<
-							(double)it->second.wins/(double)it->second.simulations << std::endl;
-		if ((double)it->second.wins/(double)it->second.simulations > bestRatio) {
-			bestRatio = (double)it->second.wins/(double)it->second.simulations;
+							<< ", score = " << it->second.score << ", score/sim = " <<
+							(double)it->second.score/(double)it->second.simulations << std::endl;
+		if ((double)it->second.score/(double)it->second.simulations > bestRatio) {
+			bestRatio = (double)it->second.score/(double)it->second.simulations;
 			bestMove = it->first;
 		}
 	}
 	return Move(bestMove, startBoard.get_next_move());
 }
 
-double uct(double wins, double simulations, double parentsimulations) {
-	return wins / simulations + sqrt(2) * sqrt(log(parentsimulations) / simulations);
+double uct(double score, double simulations, double parentsimulations) {
+	return score / simulations + sqrt(2) * sqrt(log(parentsimulations) / simulations);
 }

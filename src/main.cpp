@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
 		else {
 			Move m = computeBestMove(board);
 			board.move_piece(m);
+      cout << "Move chosen: " << m.notation() << endl;
 		}
 	}
 	cout << "Checkmate, " << board.get_next_move() << " lost" << endl;

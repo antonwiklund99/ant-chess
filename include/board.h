@@ -6,6 +6,7 @@
 #include <vector>
 #include "piece.h"
 #include "move.h"
+#include <string>
 
 class Board {
  public:
@@ -21,8 +22,8 @@ class Board {
 	friend void clean_checked_moves(Board&);
 
 	// Move piece
+  void move_piece(const std::string& s) { move_piece(Move(s, next_move), true); }
 	void move_piece(const Move& m) { move_piece(m, true); }
-	void move_piece(const Move&, bool);
 
 	// Assessors
 	char get_next_move() const { return next_move; }
@@ -47,6 +48,10 @@ class Board {
 	bool stalemate;
 	// 1 = white win 0 = draw -1 = black win empty = ongoing
 	int result;
+
+  /* Actual move_piece function, dont allow outside function calls to decide
+     wheter to check remove checked moves or not */
+  void move_piece(const Move&, bool);
 
 	void get_pieces_from_board(std::vector<Piece>&, std::vector<Piece>&);
 	std::vector<Piece> black_pieces;
