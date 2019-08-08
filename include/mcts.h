@@ -7,21 +7,21 @@
 #include "move.h"
 #include "board.h"
 
-class Node {
+class mctsNode {
  public:
 	int simulations;
 	int score;
-	std::map<std::string, Node> children;
-	Node* parent;
+	std::map<std::string, mctsNode> children;
+	mctsNode* parent;
 
-	Node(Node*);
-	Node() {};
+	mctsNode(mctsNode*);
+	mctsNode() {};
 };
 
-struct Tree {
-	Node root;
+struct mctsTree {
+	mctsNode root;
 
-  Tree() : root(NULL) {}
+  mctsTree() : root(NULL) {}
 };
 
 Move computeBestMove(const Board&);

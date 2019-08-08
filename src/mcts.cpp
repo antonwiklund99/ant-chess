@@ -18,7 +18,7 @@ using std::sort;
 #define NUMBER_OF_SEARCH_ITERATIONS 1000
 #define MAX_SEARCH_DEPTH 100
 
-Node::Node(Node* p) {
+mctsNode::mctsNode(mctsNode* p) {
 	simulations = 0;
 	score = 0;
 	parent = p;
@@ -26,8 +26,8 @@ Node::Node(Node* p) {
 
 Move computeBestMove(const Board& startBoard) {
 	// Create root node
-	Tree tree;
-	Node *headptr = &tree.root;
+	mctsTree tree;
+	mctsNode *headptr = &tree.root;
 
 	int r, totalMoves, wasWin, wasDraw;
 	Board b;
@@ -94,7 +94,7 @@ Move computeBestMove(const Board& startBoard) {
 			}
 			// If move doesnt exist create key for it and then set headptr to the node for key
 			if (headptr->children.find(optimalMove) == headptr->children.end()) {
-				headptr->children[optimalMove] = Node(headptr);
+				headptr->children[optimalMove] = mctsNode(headptr);
 			}
 			headptr = &(headptr->children[optimalMove]);
 			totalMoves += 1;
