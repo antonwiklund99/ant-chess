@@ -24,6 +24,6 @@ struct mctsTree {
   mctsTree() : root(NULL) {}
 };
 
-Move computeBestMove(const Board&);
+Move mctscomputeBestMove(const Board&);
 double uct(double, double, double);
 #endif

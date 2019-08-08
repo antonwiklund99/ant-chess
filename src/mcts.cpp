@@ -24,7 +24,7 @@ mctsNode::mctsNode(mctsNode* p) {
 	parent = p;
 }
 
-Move computeBestMove(const Board& startBoard) {
+Move mctscomputeBestMove(const Board& startBoard) {
 	// Create root node
 	mctsTree tree;
 	mctsNode *headptr = &tree.root;
@@ -60,7 +60,6 @@ Move computeBestMove(const Board& startBoard) {
 						if (ret > bestScore) {
 							bestScore = ret;
 							optimalMove = it->first;
-							//std::cout << "Move: " << optimalMove << "m.size() = " << m.size() << std::endl;
 						}
 					}
 				}
