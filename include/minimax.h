@@ -7,6 +7,6 @@
 #include "move.h"
 
 Move minimaxComputeBestMove(const Board&);
-int minimax(Board, const std::string&, int, bool);
+int minimax(Board, const std::string&, int, int, int, bool);
 int valueOfBoard(const Board&);
 #endif
