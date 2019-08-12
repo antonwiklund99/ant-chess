@@ -21,7 +21,7 @@ Move minimaxComputeBestMove(const Board& originalBoard) {
   std::cout << "Starting minimax search" << std::endl;
   currentTurn = originalBoard.get_next_move();
   string bestMove;
-  int bestScore = -201, score, alfa = -201, beta = 201;
+  float bestScore = -251, score, alfa = -251, beta = 251;
   auto moves = originalBoard.get_legal_moves();
   sort(moves.begin(), moves.end(), [](const Move& a, const Move& b) {
                                      return a.capture > b.capture;
@@ -42,7 +42,7 @@ Move minimaxComputeBestMove(const Board& originalBoard) {
 }
 
 // Minimax function with alfabeta pruning
-int minimax(Board b, const string& moveNotation, int alfa, int beta, int depth, bool maximizingPlayer) {
+float minimax(Board b, const string& moveNotation, float alfa, float beta, int depth, bool maximizingPlayer) {
   b.move_piece(moveNotation);
 
   if (depth == 0 || b.board_is_checkmate() || b.board_is_stalemate()) {
@@ -54,9 +54,9 @@ int minimax(Board b, const string& moveNotation, int alfa, int beta, int depth, 
   sort(lg.begin(), lg.end(), [](const Move& a, const Move& b) {
                                return a.capture > b.capture;
                              });
-  int value;
+  float value;
   if (maximizingPlayer) {
-    value = -201;
+    value = -251;
     for (auto i : lg) {
       value = max(value, minimax(b, i.notation(), alfa, beta, depth - 1, false));
       alfa = max(alfa, value);
@@ -66,7 +66,7 @@ int minimax(Board b, const string& moveNotation, int alfa, int beta, int depth, 
     return value;
   }
   else {
-    value = 201;
+    value = 251;
     for (auto i : lg) {
       value = min(value, minimax(b, i.notation(), alfa, beta, depth - 1, true));
       beta = min(beta, value);
@@ -79,15 +79,16 @@ int minimax(Board b, const string& moveNotation, int alfa, int beta, int depth, 
 
 // https://www.chessprogramming.org/Evaluation
 // Return value of board from current turns perspective
-int valueOfBoard(const Board& b) {
-  int prefix = (currentTurn == 'b') ? 1 : -1;
+float valueOfBoard(const Board& b) {
+  float prefix = (currentTurn == 'b') ? 1 : -1;
   if (b.board_is_checkmate())
-    return (b.get_next_move() == 'b') ? prefix*-200 : prefix*200;
+    return (b.get_next_move() == 'b') ? prefix*-250 : prefix*250;
 
   if (b.board_is_stalemate())
     return 0;
 
-  int value = 0;
+  float value = 0;
+
   // Material heuristics
   for (auto i : b.get_black_pieces()) {
     value += prefix*pieceValue(i.symbol);
@@ -96,5 +97,14 @@ int valueOfBoard(const Board& b) {
     value -= prefix*pieceValue(i.symbol);
   }
 
+  // Mobilty heuristics
+  int currentTurnMoves, opponentTurnMoves;
+  Board tmpBoard = b;
+  currentTurnMoves = b.legal_moves.size();
+  tmpBoard.next_move = (b.next_move == 'b') ? 'w' : 'b';
+  tmpBoard.parse_legal_moves(tmpBoard.next_move);
+  clean_checked_moves(tmpBoard);
+  opponentTurnMoves = tmpBoard.legal_moves.size();
+  value += (0.1 * (currentTurnMoves - opponentTurnMoves));
   return value;
 }

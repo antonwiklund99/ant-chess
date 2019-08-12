@@ -15,6 +15,5 @@ REFACTORING:
 	moves that will put side in check
 
 MAYBE-ADD:
-* Replace switch in parse_legal_moves with polymorphic piece class instead
 * Add member variable for king position for board (so you dont need to search
 	piece vector for king each time you want to know if it is check)

@@ -4,9 +4,9 @@
 #include <array>
 #include <iostream>
 #include <vector>
+#include <string>
 #include "piece.h"
 #include "move.h"
-#include <string>
 
 class Board {
  public:
@@ -20,6 +20,8 @@ class Board {
 	friend std::ostream& operator<< (std::ostream& out, const Board& obj);
 
 	friend void clean_checked_moves(Board&);
+
+  friend float valueOfBoard(const Board&);
 
 	// Move piece
   void move_piece(const std::string& s) { move_piece(Move(s, next_move), true); }
@@ -66,4 +68,5 @@ class Board {
 bool is_check(const std::vector<Piece>&, const std::vector<Move>&);
 bool piece_is_king(const Piece&);
 void clean_checked_moves(Board&);
+
 #endif
