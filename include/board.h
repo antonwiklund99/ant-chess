@@ -1,72 +1,62 @@
 #ifndef BOARD_GUARD
 #define BOARD_GUARD
 
-#include <array>
+#include <cstdint>
 #include <iostream>
-#include <vector>
-#include <string>
 #include "piece.h"
-#include "move.h"
+
+typedef uint64_t Bitboard;
 
 class Board {
  public:
-	// Constructor creates chess board with starting pieces
-	Board();
+  enum enumPiece {
+                  nWhite,
+                  nBlack,
+                  nPawn,
+                  nKnight,
+                  nBishop,
+                  nRook,
+                  nQueen,
+                  nKing,
+  };
 
-	// Create board given board array and next move
-	Board(std::array<std::array<char, 8>, 8>, char);
+  friend std::ostream& operator<<(std::ostream&, const Bitboard&);
+  /*
+  Bitboard getPieceSet(const Piece& p) const {
+    return pieceBitboards[p.type()] & pieceBitboards[p.color()];
+  }
+  */
+  // Get specific piece set
+  Bitboard getWhitePawns() const { return pieceBitboards[nPawn] & pieceBitboards[nWhite]; }
+  Bitboard getBlackPawns() const { return pieceBitboards[nPawn] & pieceBitboards[nBlack]; }
+  Bitboard getWhiteKnights() const { return pieceBitboards[nKnight] & pieceBitboards[nWhite]; }
+  Bitboard getBlackKnights() const { return pieceBitboards[nKnight] & pieceBitboards[nBlack]; }
+  Bitboard getWhiteBishops() const { return pieceBitboards[nBishop] & pieceBitboards[nWhite]; }
+  Bitboard getBlackBishops() const { return pieceBitboards[nBishop] & pieceBitboards[nBlack]; }
+  Bitboard getWhiteRooks() const { return pieceBitboards[nRook] & pieceBitboards[nWhite]; }
+  Bitboard getBlackRooks() const { return pieceBitboards[nRook] & pieceBitboards[nBlack]; }
+  Bitboard getWhiteQueen() const { return pieceBitboards[nQueen] & pieceBitboards[nWhite]; }
+  Bitboard getBlackQueen() const { return pieceBitboards[nQueen] & pieceBitboards[nBlack]; }
+  Bitboard getWhiteKing() const { return pieceBitboards[nKing] & pieceBitboards[nWhite]; }
+  Bitboard getBlackKing() const { return pieceBitboards[nKing] & pieceBitboards[nBlack]; }
 
-	// Cout board like a grid
-	friend std::ostream& operator<< (std::ostream& out, const Board& obj);
+  // Get ct color piece set
+  Bitboard getPawns(Color ct) const { return pieceBitboards[nPawn] & pieceBitboards[ct]; }
+  Bitboard getKnights(Color ct) const { return pieceBitboards[nKnight] & pieceBitboards[ct]; }
+  Bitboard getBishops(Color ct) const { return pieceBitboards[nBishop] & pieceBitboards[ct]; }
+  Bitboard getRooks(Color ct) const { return pieceBitboards[nRook] & pieceBitboards[ct]; }
+  Bitboard getQueen(Color ct) const { return pieceBitboards[nQueen] & pieceBitboards[ct]; }
+  Bitboard getKing(Color ct) const { return pieceBitboards[nKing] & pieceBitboards[ct]; }
 
-	friend void clean_checked_moves(Board&);
-
-  friend float valueOfBoard(const Board&);
-
-	// Move piece
-  void move_piece(const std::string& s) { move_piece(Move(s, next_move), true); }
-	void move_piece(const Move& m) { move_piece(m, true); }
-
-	// Assessors
-	char get_next_move() const { return next_move; }
-	bool board_is_check() const { return check; }
-	bool board_is_checkmate() const { return checkmate; }
-	bool board_is_stalemate() const { return stalemate; }
-	std::array<std::array<char, 8>, 8> get_board() const { return board; }
-	int get_result() const { return result; }
-	std::vector<Piece> get_black_pieces() const { return black_pieces; }
-	std::vector<Piece> get_white_pieces() const { return white_pieces; }
-	std::vector<Move>  get_legal_moves()  const { return legal_moves;  }
-
+  Board();
+  void reset();
  private:
-	// Constructor only used by clean_checked_moves
-	Board(std::array<std::array<char, 8>, 8>, char, bool);
+  // 0 - 1 = each colors bitboard
+  // 2 - 7 = each piece types bitboard
+  Bitboard pieceBitboards[8];
 
-	std::array<std::array<char, 8>, 8> board;
-	char next_move;
-	std::vector<Move> legal_moves;
-	bool check;
-	bool checkmate;
-	bool stalemate;
-	// 1 = white win 0 = draw -1 = black win empty = ongoing
-	int result;
-
-  /* Actual move_piece function, dont allow outside function calls to decide
-     wheter to check remove checked moves or not */
-  void move_piece(const Move&, bool);
-
-	void get_pieces_from_board(std::vector<Piece>&, std::vector<Piece>&);
-	std::vector<Piece> black_pieces;
-	std::vector<Piece> white_pieces;
-
-	void parse_legal_moves(char);
-	void walk_pawn(const Piece&, int);
-	void walk_board(const Piece&, int, int, int);
 };
 
-// Args: Piece vector for target (not next_move) team and vector of legal moves
-bool is_check(const std::vector<Piece>&, const std::vector<Move>&);
-bool piece_is_king(const Piece&);
-void clean_checked_moves(Board&);
+std::ostream& operator<<(std::ostream&, const Board&);
 
 #endif

@@ -1,5 +1,5 @@
-SOURCES=$(wildcard src/*.cpp)
-HEADERS=include/board.h include/piece.h include/move.h include/mcts.h include/graphicshandler.h include/minimax.h
+SOURCES=src/main.cpp src/piece.cpp src/board.cpp
+HEADERS=include/board.h include/piece.h
 OBJECTS=$(patsubst src/%.cpp, src/%.o, $(SOURCES))
 
 CC=g++
