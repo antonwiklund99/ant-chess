@@ -5,6 +5,7 @@
 #include <string>
 #include "position.h"
 #include "piece.h"
+#include "board.h"
 
 enum flags {
             QUIET_MOVE_FLAG = 0,
@@ -22,6 +23,7 @@ enum flags {
             ROOK_PROMOTION_CAPTURE_FLAG = 14,
             QUEEN_PROMOTION_CAPTURE_FLAG= 15,
 };
+
 class Move {
 public:
   Move(unsigned int from, unsigned int to, unsigned int flags) {
@@ -57,8 +59,10 @@ Bitboard bSinglePush(Bitboard, Bitboard);
 Bitboard wDoublePush(Bitboard, Bitboard);
 Bitboard bDoublePush(Bitboard, Bitboard);
 
-Bitboard northOne(Bitboard);
-Bitboard southOne(Bitboard);
+Bitboard wPawnEastAttack(Bitboard, Bitboard);
+Bitboard wPawnWestAttack(Bitboard, Bitboard);
+Bitboard bPawnEastAttack(Bitboard, Bitboard);
+Bitboard bPawnWestAttack(Bitboard, Bitboard);
 
 const int index64[64] = {
     0,  1, 48,  2, 57, 49, 28,  3,

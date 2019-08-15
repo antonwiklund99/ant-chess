@@ -59,3 +59,14 @@ ostream& operator<<(ostream& os, const Board& b) {
   }
   return os;
 }
+
+Bitboard northOne(Bitboard b) { return b << 8; }
+Bitboard southOne(Bitboard b) { return b >> 8; }
+
+Bitboard westOne(Bitboard b) { return (b & notAFile) >> 1; }
+Bitboard southWestOne(Bitboard b) { return (b & notAFile) >> 9; }
+Bitboard northWestOne(Bitboard b) { return (b & notAFile) << 7; }
+
+Bitboard eastOne(Bitboard b) { return (b & notHFile) << 1; }
+Bitboard southEastOne(Bitboard b) { return (b & notHFile) >> 7; }
+Bitboard northEastOne(Bitboard b) { return (b & notHFile) << 9; }

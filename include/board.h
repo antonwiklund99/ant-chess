@@ -73,6 +73,21 @@ class Board {
 };
 
 void initBitboards();
+
+const Bitboard notAFile = 0xfefefefefefefefe; // ~0x0101010101010101
+const Bitboard notHFile = 0x7f7f7f7f7f7f7f7f; // ~0x8080808080808080
+
+Bitboard northOne(Bitboard);
+Bitboard southOne(Bitboard);
+
+Bitboard westOne(Bitboard);
+Bitboard southWestOne(Bitboard);
+Bitboard northWestOne(Bitboard);
+
+Bitboard eastOne(Bitboard);
+Bitboard southEastOne(Bitboard);
+Bitboard northEastOne(Bitboard);
+
 std::ostream& operator<<(std::ostream&, const Board&);
 
 #endif
