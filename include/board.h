@@ -7,6 +7,18 @@
 
 typedef uint64_t Bitboard;
 
+const Bitboard RANK_1 = 0x00000000000000ff;
+const Bitboard RANK_2 = 0x000000000000ff00;
+const Bitboard RANK_3 = 0x0000000000ff0000;
+const Bitboard RANK_4 = 0x00000000ff000000;
+const Bitboard RANK_5 = 0x000000ff00000000;
+const Bitboard RANK_6 = 0x0000ff0000000000;
+const Bitboard RANK_7 = 0x00ff000000000000;
+const Bitboard RANK_8 = 0xff00000000000000;
+
+//Bitboard bishopAttacks[2048];
+//Bitboard rookAttacks[8196];
+
 class Board {
  public:
   enum enumPiece {
@@ -21,11 +33,13 @@ class Board {
   };
 
   friend std::ostream& operator<<(std::ostream&, const Bitboard&);
-  /*
-  Bitboard getPieceSet(const Piece& p) const {
-    return pieceBitboards[p.type()] & pieceBitboards[p.color()];
-  }
-  */
+
+  // Get specific color
+  Bitboard getWhites() const { return pieceBitboards[nWhite]; }
+  Bitboard getBlacks() const { return pieceBitboards[nBlack]; }
+  Bitboard getOccupied() const { return pieceBitboards[nWhite] | pieceBitboards[nBlack]; }
+  Bitboard getEmpty() const { return ~(pieceBitboards[nWhite] | pieceBitboards[nBlack]); }
+
   // Get specific piece set
   Bitboard getWhitePawns() const { return pieceBitboards[nPawn] & pieceBitboards[nWhite]; }
   Bitboard getBlackPawns() const { return pieceBitboards[nPawn] & pieceBitboards[nBlack]; }
@@ -41,6 +55,7 @@ class Board {
   Bitboard getBlackKing() const { return pieceBitboards[nKing] & pieceBitboards[nBlack]; }
 
   // Get ct color piece set
+  Bitboard getSide(Color ct) const { return pieceBitboards[ct]; }
   Bitboard getPawns(Color ct) const { return pieceBitboards[nPawn] & pieceBitboards[ct]; }
   Bitboard getKnights(Color ct) const { return pieceBitboards[nKnight] & pieceBitboards[ct]; }
   Bitboard getBishops(Color ct) const { return pieceBitboards[nBishop] & pieceBitboards[ct]; }
@@ -57,6 +72,7 @@ class Board {
 
 };
 
+void initBitboards();
 std::ostream& operator<<(std::ostream&, const Board&);
 
 #endif

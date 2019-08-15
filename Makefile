@@ -1,5 +1,5 @@
-SOURCES=src/main.cpp src/piece.cpp src/board.cpp
-HEADERS=include/board.h include/piece.h
+SOURCES=src/main.cpp src/piece.cpp src/board.cpp src/position.cpp src/move.cpp
+HEADERS=include/board.h include/piece.h include/position.h include/move.h
 OBJECTS=$(patsubst src/%.cpp, src/%.o, $(SOURCES))
 
 CC=g++

@@ -18,6 +18,9 @@ void Board::reset() {
   pieceBitboards[7] = 0x1000000000000010;
 }
 
+void initBitboards() {
+  //https://www.chessprogramming.org/Magic_Bitboards
+}
 // Cout bitboard
 ostream& operator<<(ostream& os, const Board& b) {
   Bitboard mask = 1;
