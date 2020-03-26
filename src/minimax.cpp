@@ -5,106 +5,118 @@
 #include <iostream>
 #include "minimax.h"
 #include "move.h"
-#include "board.h"
-using std::string;
-using std::max;
-using std::min;
-using std::sort;
+#include "enums.h"
+#include "utils.h"
+using std::max; using std::min;
+using std::sort; using std::vector;
 
-#define SEARCH_DEPTH 4
+#define SEARCH_DEPTH 10
 
-// The side that we are computing the best move for, used in valueOfBoard function
+// The side that we are computing the best move for, used in valueOfPos function
 // to decide who to value it for
-char currentTurn;
+Color currentTurn;
 
-Move minimaxComputeBestMove(const Board& originalBoard) {
+Move minimaxComputeBestMove(Position original) {
   std::cout << "Starting minimax search" << std::endl;
-  currentTurn = originalBoard.get_next_move();
-  string bestMove;
+  Move* bestMove = nullptr;
   float bestScore = -251, score, alfa = -251, beta = 251;
-  auto moves = originalBoard.get_legal_moves();
+  vector<Move> moves;
+  currentTurn = original.turn;
+  generateMoves(original, moves, original.turn);
   sort(moves.begin(), moves.end(), [](const Move& a, const Move& b) {
-                                     return a.capture > b.capture;
+                                     return a.isCapture() > b.isCapture();
                                    });
-  for (auto i : moves) {
-    std::cout << "Calculating minimax for move " << i.notation() << std::endl;
-
-    score = minimax(originalBoard, i.notation(), alfa , beta, SEARCH_DEPTH, false);
+  for (int i = 0; i < moves.size(); i++) {
+    Move* m = &moves[i];
+    std::cout << "Calculating minimax for move " << m->notation();
+    original.makeMove(*m);
+    score = minimax(original, alfa , beta, SEARCH_DEPTH, false);
     alfa = max(alfa, score);
-    std::cout << "Score = " << score << std::endl;
+    std::cout << ", score = " << score << std::endl;
     if (score > bestScore) {
       bestScore = score;
-      bestMove = i.notation();
+      bestMove = &moves[i];
     }
+    original.unmakeMove(*m);
   }
 
-  return Move(bestMove, originalBoard.get_next_move());
+  return *bestMove;
 }
 
 // Minimax function with alfabeta pruning
-float minimax(Board b, const string& moveNotation, float alfa, float beta, int depth, bool maximizingPlayer) {
-  b.move_piece(moveNotation);
-
-  if (depth == 0 || b.board_is_checkmate() || b.board_is_stalemate()) {
-    return valueOfBoard(b);
+float minimax(Position& pos, float alfa, float beta, int depth, bool maximizingPlayer) {
+  //std::cout << "DEPTH = " << depth << " MAXIMIZING = " << maximizingPlayer << std::endl;
+  if (depth == 0) {
+    return valueOfPos(pos);
   }
 
   // Sort so moves that capture comes first, to get more cutoffs
-  auto lg = b.get_legal_moves();
+  vector<Move> lg;
+  generateMoves(pos, lg);
   sort(lg.begin(), lg.end(), [](const Move& a, const Move& b) {
-                               return a.capture > b.capture;
+                               return a.isCapture() > b.isCapture();
                              });
   float value;
+  bool checkmate = true;
   if (maximizingPlayer) {
     value = -251;
-    for (auto i : lg) {
-      value = max(value, minimax(b, i.notation(), alfa, beta, depth - 1, false));
-      alfa = max(alfa, value);
-      if (alfa >= beta)
-        break;
+    for (auto m : lg) {
+      if (pos.makeMove(m)) {
+        checkmate = false;
+        value = max(value, minimax(pos, alfa, beta, depth - 1, false));
+        alfa = max(alfa, value);
+        if (alfa >= beta)
+          break;
+        /* Kanske skulle vara bättre att skicka med move som argument och göra makeMove i början
+         av funktionen och undvika den här unmake:n. Jobbiga med det var att ta reda på
+         checkmate/stalemate då eftersom generateMoves genererar pseudo legal moves, nivån
+         ovanför skulle inte veta att move:t inte var legit*/
+        pos.unmakeMove(m);
+      }
     }
-    return value;
   }
   else {
     value = 251;
-    for (auto i : lg) {
-      value = min(value, minimax(b, i.notation(), alfa, beta, depth - 1, true));
-      beta = min(beta, value);
-      if (alfa >= beta)
-        break;
+    for (auto m : lg) {
+      if (pos.makeMove(m)) {
+        checkmate = false;
+        value = min(value, minimax(pos, alfa, beta, depth - 1, true));
+        beta = min(beta, value);
+        if (alfa >= beta)
+          break;
+        pos.unmakeMove(m);
+      }
     }
-    return value;
   }
+  // väldigt fult
+  if (checkmate) {
+    if (pos.board.isAttacked(pos.turn == cWhite ? pos.board.getWhiteKing() :
+                             pos.board.getBlackKing(), pos.turn == cWhite ? cBlack : cWhite))
+      return 250*(maximizingPlayer ? -1 : 1);
+    else
+      return 0;
+  }
+  else return value;
 }
 
 // https://www.chessprogramming.org/Evaluation
-// Return value of board from current turns perspective
-float valueOfBoard(const Board& b) {
-  float prefix = (currentTurn == 'b') ? 1 : -1;
-  if (b.board_is_checkmate())
-    return (b.get_next_move() == 'b') ? prefix*-250 : prefix*250;
-
-  if (b.board_is_stalemate())
-    return 0;
-
-  float value = 0;
-
-  // Material heuristics
-  for (auto i : b.get_black_pieces()) {
-    value += prefix*pieceValue(i.symbol);
-  }
-  for (auto i : b.get_white_pieces()) {
-    value -= prefix*pieceValue(i.symbol);
-  }
+// Return value of position from current turns perspective
+float valueOfPos(const Position& pos) {
+  float value =
+    9*(countOnes(pos.board.getWhiteQueen()) - countOnes(pos.board.getBlackQueen())) +
+    5*(countOnes(pos.board.getWhiteRooks()) - countOnes(pos.board.getBlackRooks())) +
+    3*(
+       countOnes(pos.board.getWhiteKnights()) - countOnes(pos.board.getBlackKnights()) +
+       countOnes(pos.board.getWhiteBishops()) - countOnes(pos.board.getBlackBishops())
+       ) +
+    (countOnes(pos.board.getWhitePawns() - pos.board.getBlackPawns()))
+    // TODO: 0,5*(doubled, blocked and isolated pawns)
+    ;
 
   // Mobilty heuristics
-  int currentTurnMoves, opponentTurnMoves;
-  Board tmpBoard = b;
-  currentTurnMoves = b.legal_moves.size();
-  tmpBoard.next_move = (b.next_move == 'b') ? 'w' : 'b';
-  tmpBoard.parse_legal_moves(tmpBoard.next_move);
-  clean_checked_moves(tmpBoard);
-  opponentTurnMoves = tmpBoard.legal_moves.size();
-  value += (0.1 * (currentTurnMoves - opponentTurnMoves));
-  return value;
+  vector<Move> whiteMoves, blackMoves;
+  generateMoves(pos, whiteMoves, cWhite);
+  generateMoves(pos, blackMoves, cBlack);
+  value += 0.5*(whiteMoves.size() - blackMoves.size());
+  return value*(currentTurn == cWhite ? 1 : -1);
 }

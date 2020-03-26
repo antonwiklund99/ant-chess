@@ -1,19 +1,2 @@
 TODOS:
-* Make checks for board constructors arguments only two of each piece except pawns etc.
-* Add ability to castle
-* Add en passant
-* Add pawn promotion
-* Add all stalemate/loss conditions
-
-REFACTORING:
-* Change board.legal_moves to a list instead of vector (no random accessing,
-  just inserting and deleting), black/white_pieces too?
-* Add enums/typedef instead of char and ints for some variables (move.piece, board.next_move,
-	piece.symbol, piece.color etc.)
-* Change variable and function names to thisName from this_name
-* Make parse_legal_moves do what clean_checked_moves does or find some cleaner way to remove
-	moves that will put side in check
-
-MAYBE-ADD:
-* Add member variable for king position for board (so you dont need to search
-	piece vector for king each time you want to know if it is check)
+* Make move and unmake move

@@ -1,37 +1,13 @@
 #ifndef BOARD_GUARD
 #define BOARD_GUARD
 
-#include <cstdint>
 #include <iostream>
-#include "piece.h"
-
-typedef uint64_t Bitboard;
-
-const Bitboard RANK_1 = 0x00000000000000ff;
-const Bitboard RANK_2 = 0x000000000000ff00;
-const Bitboard RANK_3 = 0x0000000000ff0000;
-const Bitboard RANK_4 = 0x00000000ff000000;
-const Bitboard RANK_5 = 0x000000ff00000000;
-const Bitboard RANK_6 = 0x0000ff0000000000;
-const Bitboard RANK_7 = 0x00ff000000000000;
-const Bitboard RANK_8 = 0xff00000000000000;
-
-//Bitboard bishopAttacks[2048];
-//Bitboard rookAttacks[8196];
+#include <string>
+#include "enums.h"
+#include "move.h"
 
 class Board {
  public:
-  enum enumPiece {
-                  nWhite,
-                  nBlack,
-                  nPawn,
-                  nKnight,
-                  nBishop,
-                  nRook,
-                  nQueen,
-                  nKing,
-  };
-
   friend std::ostream& operator<<(std::ostream&, const Bitboard&);
 
   // Get specific color
@@ -64,30 +40,26 @@ class Board {
   Bitboard getKing(Color ct) const { return pieceBitboards[nKing] & pieceBitboards[ct]; }
 
   Board();
+  Board(std::string);
   void reset();
+  bool isAttacked(Bitboard, Color) const;
+  void unsafeMakeMove(const Move&);
+  Piece pieceOnSq(int) const;
  private:
   // 0 - 1 = each colors bitboard
   // 2 - 7 = each piece types bitboard
   Bitboard pieceBitboards[8];
 
 };
+Bitboard wSinglePush(Bitboard, Bitboard);
+Bitboard bSinglePush(Bitboard, Bitboard);
+Bitboard wDoublePush(Bitboard, Bitboard);
+Bitboard bDoublePush(Bitboard, Bitboard);
 
-void initBitboards();
-
-const Bitboard notAFile = 0xfefefefefefefefe; // ~0x0101010101010101
-const Bitboard notHFile = 0x7f7f7f7f7f7f7f7f; // ~0x8080808080808080
-
-Bitboard northOne(Bitboard);
-Bitboard southOne(Bitboard);
-
-Bitboard westOne(Bitboard);
-Bitboard southWestOne(Bitboard);
-Bitboard northWestOne(Bitboard);
-
-Bitboard eastOne(Bitboard);
-Bitboard southEastOne(Bitboard);
-Bitboard northEastOne(Bitboard);
+Bitboard wPawnEastAttack(Bitboard, Bitboard);
+Bitboard wPawnWestAttack(Bitboard, Bitboard);
+Bitboard bPawnEastAttack(Bitboard, Bitboard);
+Bitboard bPawnWestAttack(Bitboard, Bitboard);
 
 std::ostream& operator<<(std::ostream&, const Board&);
-
 #endif

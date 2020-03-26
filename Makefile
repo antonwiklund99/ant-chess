@@ -1,5 +1,5 @@
-SOURCES=src/main.cpp src/piece.cpp src/board.cpp src/position.cpp src/move.cpp
-HEADERS=include/board.h include/piece.h include/position.h include/move.h
+SOURCES=src/utils.cpp src/main.cpp src/piecePatterns.cpp src/board.cpp src/position.cpp src/move.cpp src/magic.cpp src/minimax.cpp
+HEADERS=include/utils.h include/piecePatterns.h include/board.h include/position.h include/move.h include/magic.h include/enums.h include/minimax.h
 OBJECTS=$(patsubst src/%.cpp, src/%.o, $(SOURCES))
 
 CC=g++
@@ -11,4 +11,4 @@ main: $(OBJECTS)
 $(OBJECTS): src/%.o : src/%.cpp $(HEADERS)
 	$(CC) $(CPPFLAGS) -c $< -o $@
 clean:
-	rm -f src/*.o main
+	rm -f src/*.o main test/*.o test/test

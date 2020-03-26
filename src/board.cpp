@@ -1,10 +1,58 @@
 #include <iostream>
-#include <bitset>
+#include <string>
+#include <cctype>
+#include <iterator>
+#include <stdexcept>
 #include "board.h"
+#include "move.h"
+#include "magic.h"
+#include "utils.h"
 using std::ostream;
+using std::string;
 
 Board::Board() {
   reset();
+}
+
+Board::Board(string s) {
+  for (int i = 0; i < 8; i++) {
+    pieceBitboards[i] = 0;
+  }
+  Bitboard mask = 1;
+  int shiftCount = 0;
+
+  for (auto it = s.begin(); it != s.end(); it++) {
+    if (*it == '/') {
+      continue;
+    }
+    else if (isalpha(*it)) {
+      Piece c = islower(*it) ? nWhite : nBlack;
+      Piece p;
+      switch (tolower(*it)) {
+      case 'p' : {p = nPawn; break;}
+      case 'n' : {p = nKnight; break;}
+      case 'b' : {p = nBishop; break;}
+      case 'r' : {p = nRook; break;}
+      case 'q' : {p = nQueen; break;}
+      case 'k' : {p = nKing; break;}
+      default  : {throw std::invalid_argument("Unknow letter in fen string");}
+      }
+      pieceBitboards[c] |= mask;
+      pieceBitboards[p] |= mask;
+      mask <<= 1;
+      shiftCount++;
+    }
+    else if (*it != '0' && isdigit(*it)){
+      mask <<= (*it - '0');
+      shiftCount += (*it - '0');
+    }
+    else {
+      throw std::invalid_argument("Unknow character in fen string");
+    }
+  }
+  if (shiftCount != 64) {
+    throw std::invalid_argument("Not right amount of squares in fen string");
+  }
 }
 
 void Board::reset() {
@@ -18,40 +66,128 @@ void Board::reset() {
   pieceBitboards[7] = 0x1000000000000010;
 }
 
-void initBitboards() {
-  //https://www.chessprogramming.org/Magic_Bitboards
+bool Board::isAttacked(Bitboard target, Color attackingColor) const {
+  int sq = bitScanForward(target);
+  if (attackingColor == cWhite) {
+    Bitboard pawns = getBlackPawns();
+    if (wPawnWestAttack(target, pawns) | wPawnEastAttack(target, pawns)) return true;
+
+    Bitboard sliders = getWhiteBishops() | getWhiteQueen();
+    const Magic& m1 = Magic::bishopTable[sq];
+    Bitboard occ = m1.mask & getOccupied();
+    if (m1.ptr[transform(occ, m1.magic, m1.shift)] & sliders) return true;
+
+    sliders = getWhiteRooks() | getWhiteQueen();
+    const Magic& m2 = Magic::rookTable[sq];
+    occ = m2.mask & getOccupied();
+    if (m2.ptr[transform(occ, m2.magic, m2.shift)] & sliders) return true;
+  }
+  else {
+    Bitboard pawns = getWhitePawns();
+    if (bPawnWestAttack(target, pawns) | bPawnEastAttack(target, pawns)) return true;
+
+    Bitboard sliders = getBlackBishops() | getBlackQueen();
+    const Magic& m1 = Magic::bishopTable[sq];
+    Bitboard occ = m1.mask & getOccupied();
+    if (m1.ptr[transform(occ, m1.magic, m1.shift)] & sliders) return true;
+
+    sliders = getBlackRooks() | getBlackQueen();
+    const Magic& m2 = Magic::rookTable[sq];
+    occ = m2.mask & getOccupied();
+    if (m2.ptr[transform(occ, m2.magic, m2.shift)] & sliders) return true;
+  }
+  return false;
 }
+
+// makes the move on board, can also be used to unmake move since it toggles the bits
+void Board::unsafeMakeMove(const Move& m) {
+  Bitboard fromBB = 1ULL << m.getFrom();
+  Bitboard toBB = 1ULL << m.getTo();
+  Bitboard fromToBB = fromBB ^ toBB;
+  pieceBitboards[m.piece] ^= fromToBB;
+  pieceBitboards[m.color] ^= fromToBB;
+  if (m.isCapture()) {
+    // if capture toggle captured piece's bitboards
+    pieceBitboards[m.cPiece] ^= toBB;
+    pieceBitboards[m.cColor] ^= toBB;
+  }
+}
+
+Piece Board::pieceOnSq(int n) const {
+  Bitboard bb = 1ULL << n;
+  if (bb & pieceBitboards[nPawn]) return nPawn;
+  if (bb & pieceBitboards[nKnight]) return nKnight;
+  if (bb & pieceBitboards[nBishop]) return nBishop;
+  if (bb & pieceBitboards[nRook]) return nRook;
+  if (bb & pieceBitboards[nQueen]) return nQueen;
+  if (bb & pieceBitboards[nKing]) return nKing;
+  return nEmpty;
+}
+
+Bitboard wSinglePush(Bitboard pawns, Bitboard emptySqs) {
+  return northOne(pawns) & emptySqs;
+}
+
+Bitboard wDoublePush(Bitboard singlePushes, Bitboard emptySqs) {
+  return northOne(singlePushes) & RANK_4 & emptySqs;
+}
+
+Bitboard bSinglePush(Bitboard pawns, Bitboard emptySqs) {
+  return southOne(pawns) & emptySqs;
+}
+
+Bitboard bDoublePush(Bitboard singlePushes, Bitboard emptySqs) {
+  return southOne(singlePushes) & RANK_5 & emptySqs;
+}
+
+Bitboard wPawnEastAttack(Bitboard wpawns, Bitboard bpieces) {
+  return northEastOne(wpawns) & bpieces;
+}
+
+Bitboard wPawnWestAttack(Bitboard wpawns, Bitboard bpieces) {
+  return northWestOne(wpawns) & bpieces;
+}
+
+Bitboard bPawnEastAttack(Bitboard bpawns, Bitboard wpieces) {
+  return southEastOne(bpawns) & wpieces;
+}
+
+Bitboard bPawnWestAttack(Bitboard bpawns, Bitboard wpieces) {
+  return southWestOne(bpawns) & wpieces;
+}
+
 // Cout bitboard
 ostream& operator<<(ostream& os, const Board& b) {
   Bitboard mask = 1;
+  os << "  A B C D E F G H\n";
   for (int i = 0; i < 64; i++) {
-    //os << std::bitset<64>(mask) << std::endl;
-    if (b.getWhitePawns() & mask)
-      os << "p ";
-    else if (b.getBlackPawns() & mask)
-      os << "P ";
-    else if (b.getWhiteKnights() & mask)
-      os << "n ";
+    if (i % 8 == 0) os << i/8 + 1 << " ";
+    if (b.getBlackPawns() & mask)
+      os << "♙ ";
+    else if (b.getWhitePawns() & mask)
+      os << "♟ ";
     else if (b.getBlackKnights() & mask)
-      os << "N ";
-    else if (b.getWhiteBishops() & mask)
-      os << "b ";
+      os << "♘ ";
+    else if (b.getWhiteKnights() & mask)
+      os << "♞ ";
     else if (b.getBlackBishops() & mask)
-      os << "B ";
-    else if (b.getWhiteRooks() & mask)
-      os << "r ";
+      os << "♗ ";
+    else if (b.getWhiteBishops() & mask)
+      os << "♝ ";
     else if (b.getBlackRooks() & mask)
-      os << "R ";
-    else if (b.getWhiteQueen() & mask)
-      os << "q ";
+      os << "♖ ";
+    else if (b.getWhiteRooks() & mask)
+      os << "♜ ";
     else if (b.getBlackQueen() & mask)
-      os << "Q ";
-    else if (b.getWhiteKing() & mask)
-      os << "k ";
+      os << "♕ ";
+    else if (b.getWhiteQueen() & mask)
+      os << "♛ ";
     else if (b.getBlackKing() & mask)
-      os << "K ";
+      os << "♔ ";
+    else if (b.getWhiteKing() & mask)
+      os << "♔ ";
     else
-      os << "0 ";
+      os << "  ";
 
     mask <<= 1;
     if ((i + 1) % 8 == 0)
@@ -59,14 +195,3 @@ ostream& operator<<(ostream& os, const Board& b) {
   }
   return os;
 }
-
-Bitboard northOne(Bitboard b) { return b << 8; }
-Bitboard southOne(Bitboard b) { return b >> 8; }
-
-Bitboard westOne(Bitboard b) { return (b & notAFile) >> 1; }
-Bitboard southWestOne(Bitboard b) { return (b & notAFile) >> 9; }
-Bitboard northWestOne(Bitboard b) { return (b & notAFile) << 7; }
-
-Bitboard eastOne(Bitboard b) { return (b & notHFile) << 1; }
-Bitboard southEastOne(Bitboard b) { return (b & notHFile) >> 7; }
-Bitboard northEastOne(Bitboard b) { return (b & notHFile) << 9; }
