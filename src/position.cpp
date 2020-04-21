@@ -4,6 +4,23 @@
 #include "piecePatterns.h"
 #include "utils.h"
 #include <vector>
+using std::string; using std::vector;
+
+Position::Position(string fen) {
+	vector<string> args;
+	split(fen, args, ' ');
+	if (args.size() != 6)
+		throw new std::invalid_argument("FEN-string doesn't contain the correct amount of elements");
+	Board b(args[0]);
+	board = b;
+	turn = (args[1] == "w") ? cWhite : cBlack;
+	// TODO CASTLING STUFF
+	// TODO EN PASSANT
+	wcastling = true;
+	bcastling = true;
+	halfMoveClock = std::stoi(args[4]);
+	fullMoveNumber = std::stoi(args[5]);
+}
 
 bool Position::makeMove(const Move& m) {
   board.unsafeMakeMove(m);
@@ -13,19 +30,25 @@ bool Position::makeMove(const Move& m) {
     return false;
   }
   else {
+		if (turn == cBlack) fullMoveNumber++;
+		if (m.isCapture() || m.piece == nPawn) {
+			halfMoveClock = 0;
+		}
+		else halfMoveClock++;
     turn = (turn == cWhite ? cBlack : cWhite);
     //castling stuff
-    //halfmoveclock stuff
     return true;
   }
 }
 
 void Position::unmakeMove(const Move&m) {
+	// THIS WILL FUCK UP HALFMOVECLOCK
+	if (turn == cWhite) fullMoveNumber--;
   turn = (turn == cWhite ? cBlack : cWhite);
   board.unsafeMakeMove(m);
 }
 
-void addFromBitboard(int from, Bitboard moves, const Position& pos, std::vector<Move>& moveVec,
+void addFromBitboard(int from, Bitboard moves, const Position& pos, vector<Move>& moveVec,
                      Bitboard targets, Color turn, Piece p) {
   Bitboard captures = moves & targets;
   moves ^= captures;
@@ -41,12 +64,13 @@ void addFromBitboard(int from, Bitboard moves, const Position& pos, std::vector<
   }
 }
 
-void generateMoves(const Position& p, std::vector<Move>& moveVec) {
+void generateMoves(const Position& p, vector<Move>& moveVec) {
   generateMoves(p, moveVec, p.turn);
 }
-
-void generateMoves(const Position& pos, std::vector<Move>& moveVec, Color turn) {
+//Pseudo-legal moves
+void generateMoves(const Position& pos, vector<Move>& moveVec, Color turn) {
   Bitboard own, opponent, pawns, knights, king, rooks, bishops, queen, empty = pos.board.getEmpty();
+	moveVec.clear();
   if (turn == cWhite) {
     own = pos.board.getWhites();
     opponent = pos.board.getBlacks();
@@ -117,51 +141,76 @@ void generateMoves(const Position& pos, std::vector<Move>& moveVec, Color turn) 
 
     if (pawnEastAttacks) do {
         int idx = bitScanForward(pawnEastAttacks);
-        moveVec.push_back(Move(idx + 9, idx, 4, nPawn, cBlack, pos.board.pieceOnSq(idx), cWhite));
+        moveVec.push_back(Move(idx + 7, idx, 4, nPawn, cBlack, pos.board.pieceOnSq(idx), cWhite));
       } while (pawnEastAttacks &= pawnEastAttacks - 1);
 
     if (pawnWestAttacks) do {
         int idx = bitScanForward(pawnWestAttacks);
-        moveVec.push_back(Move(idx + 7, idx, 4, nPawn, cBlack, pos.board.pieceOnSq(idx), cWhite));
+        moveVec.push_back(Move(idx + 9, idx, 4, nPawn, cBlack, pos.board.pieceOnSq(idx), cWhite));
       } while (pawnWestAttacks &= pawnWestAttacks - 1);
   }
   // TODO: Add en-passant https://en.wikipedia.org/wiki/En_passant
 
   // Knight
-  do {
+	if (knights) {
+		do {
       int origin = bitScanForward(knights);
       Bitboard attacks = PiecePatterns::knight[origin] & ~own;
       addFromBitboard(origin, attacks, pos, moveVec, opponent, turn, nKnight);
-  } while (knights &= knights - 1);
+		} while (knights &= knights - 1);
+	}
 
   // King
-  int idx = bitScanForward(king);
-  Bitboard kingMoves = PiecePatterns::king[idx] & ~own;
-  addFromBitboard(idx, kingMoves, pos, moveVec, opponent, turn, nKing);
+	if (king) {
+		int idx = bitScanForward(king);
+		Bitboard kingMoves = PiecePatterns::king[idx] & ~own;
+		addFromBitboard(idx, kingMoves, pos, moveVec, opponent, turn, nKing);
+	}
 
   // Rook
-  do {
-    int from = bitScanForward(rooks);
-    const Magic& m = Magic::rookTable[from];
-    Bitboard occ = pos.board.getOccupied() & m.mask;
-    Bitboard moves = m.ptr[transform(occ, m.magic, m.shift)] &~own;
-    addFromBitboard(from, moves, pos, moveVec, opponent, turn, nRook);
-  } while (rooks &= rooks - 1);
+	if (rooks) {
+		do {
+			int from = bitScanForward(rooks);
+			const Magic& m = Magic::rookTable[from];
+			Bitboard occ = pos.board.getOccupied() & m.mask;
+			Bitboard moves = m.ptr[transform(occ, m.magic, m.shift)] &~own;
+			addFromBitboard(from, moves, pos, moveVec, opponent, turn, nRook);
+		} while (rooks &= rooks - 1);
+	}
 
   // Bishop
-  do {
-    int from = bitScanForward(bishops);
-    const Magic& m = Magic::bishopTable[from];
-    Bitboard occ = pos.board.getOccupied() & m.mask;
-    Bitboard moves = m.ptr[transform(occ, m.magic, m.shift)] &~own;
-    addFromBitboard(from, moves, pos, moveVec, opponent, turn, nBishop);
-  } while (bishops &= bishops - 1);
+	if (bishops) {
+		do {
+			int from = bitScanForward(bishops);
+			const Magic& m = Magic::bishopTable[from];
+			Bitboard occ = pos.board.getOccupied() & m.mask;
+			Bitboard moves = m.ptr[transform(occ, m.magic, m.shift)] &~own;
+			addFromBitboard(from, moves, pos, moveVec, opponent, turn, nBishop);
+		} while (bishops &= bishops - 1);
+	}
 
   // Queen
-  idx = bitScanForward(queen);
-  const Magic& bm = Magic::bishopTable[idx], rm = Magic::rookTable[idx];
-  Bitboard bocc = pos.board.getOccupied() & bm.mask, rocc = pos.board.getOccupied() & rm.mask;
-  Bitboard moves = (bm.ptr[transform(bocc, bm.magic, bm.shift)] |
-                    rm.ptr[transform(rocc, rm.magic, rm.shift)]) &~own;
-  addFromBitboard(idx, moves, pos, moveVec, opponent, turn, nQueen);
+	if (queen) {
+		int idx = bitScanForward(queen);
+		const Magic& bm = Magic::bishopTable[idx], rm = Magic::rookTable[idx];
+		Bitboard bocc = pos.board.getOccupied() & bm.mask, rocc = pos.board.getOccupied() & rm.mask;
+		Bitboard moves = (bm.ptr[transform(bocc, bm.magic, bm.shift)] |
+											rm.ptr[transform(rocc, rm.magic, rm.shift)]) &~own;
+		addFromBitboard(idx, moves, pos, moveVec, opponent, turn, nQueen);
+	}
+}
+
+vector<Move> legalMoves(Position &p) {
+	vector<Move> x;
+	generateMoves(p, x);
+	for (auto i = x.begin(); i != x.end();) {
+		if (p.makeMove(*i)) {
+			p.unmakeMove(*i);
+			i++;
+		}
+		else {
+			x.erase(i);
+		}
+	}
+	return x;
 }

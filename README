@@ -1,2 +1,4 @@
 TODOS:
-* Make move and unmake move
+* FIX HORSE MOVE GEN for
+position startpos moves d2d4 e7e6 e2e4 d8h4 g2g3 h4e4 d1e2 e4h1 f1h3 h1g1 e1d2 b8c6 h3g4 f8e7 g4h5 g8f6 h5f3 c6d4 e2e1 g1e1 d2e1 d4f3 e1f1 f6e4 f1g2 f3e1 g2h3 e1c2 c1d2 e4d2 h3g4 c2a1 b1d2
+doesnt give b1d2

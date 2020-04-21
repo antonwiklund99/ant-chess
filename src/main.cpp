@@ -1,47 +1,101 @@
 #include <iostream>
 #include <vector>
-#include <chrono>
-#include "position.h"
-#include "board.h"
+//#include <chrono>
+//#include "position.h"
+//#include "board.h"
 #include "move.h"
 #include "piecePatterns.h"
 #include "magic.h"
-#include "minimax.h"
+//#include "minimax.h"
 #include "utils.h"
-
-int indexOf(std::vector<Move> &v, std::string& s) {
-  for (int i = 0; i < v.size(); i++) {
-    std::cout << "s " << s << " v " << v[i].notation() << " " << v[i].notation().compare(s) << std::endl;
-
-    if (v[i].notation().compare(s) == 0) return i;
-  }
-  return -1;
-}
+#include "uci.h"
 
 int main(int argc, char *argv[])
 {
-  //Board b("rnb1kbnr/ppp1pppp/8/3p4/q7/2P2P2/PP1PP1PP/RNBQKBNR");
+  //Board b("rnb1kbnr/pppp1ppp/8/4p3/6q1/4P3/PPPP1PPP/RNB1KBNR");
   Board b;
-  Position pos(b, cWhite, true, true, 1);
-  PiecePatterns::initEasyBitboards();
-  initMagic();
+  Position pos("r1b1k2r/ppppbppp/4p3/8/6K1/6P1/PP1n1P1P/nN6 w KQkq - 0 1");
+	initMagic();
+	PiecePatterns::initEasyBitboards();
+	//Board b("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R");
+	//std::cout << b;
+	std::cout << pos.board;
+	std::vector<Move> x = legalMoves(pos);
+	std::vector<Move> x2;
+	generateMoves(pos, x2);
+	// GER INTE b1d2
+	std::cout << "ALL" << std::endl;
+	for (auto i: x) std::cout << i.notation() << std::endl;
+	std::cout << "LEGAL" << std::endl;
+	for (auto i: x2) std::cout << i.notation() << std::endl;
+	/*
 
+
+
+	try {
+			UCI::run();
+	} catch (std::invalid_argument e) {
+		std::cout << e.what() << std::endl;
+	}
+	*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
   std::vector<Move> moveVec;
   int n = 0;
-  while (true && n < 1000) {
+  while (n < 20 && legalMoves(pos).size() != 0) {
     moveVec.clear();
     generateMoves(pos, moveVec);
     std::cout << pos.board << std::endl;
     std::cout << "TURN = " << (pos.turn == cWhite ? "white" : "black") << std::endl;
     std::cout << "LEGAL MOVES: " << std::endl;
-    for (int i = 0; i < moveVec.size(); i++) {
+    for (auto i = 0; i < moveVec.size(); i++) {
       std::cout << i << " " << moveVec[i].notation() << std::endl;
     }
-    Move m = minimaxComputeBestMove(pos);
-    std::cout << "MINIMAX MOVE = " << m.notation() << std::endl;
-    std::string k = m.notation();
 
-    /*
+		//		if (pos.turn == cWhite) {
+			Move m = minimaxComputeBestMove(pos);
+			std::cout << "MINIMAX MOVE = " << m.notation() << std::endl;
+			std::string k = m.notation();
+			std::cout << "Move done succesfully? " << pos.makeMove(m) << "\n\n";
+			//		}
+
+		else {
+
+			std::string k;
+			int i = -1;
+			printBitboardRows(pos.board.getBlackPawns());
+			do {
+				std::cout << "enter move: ";
+				std::cin >> k;
+				if (k == "quit") return 0;
+				i = indexOf(moveVec, k);
+			} while (i == -1);
+			Move& m = moveVec[i];
+			std::cout << "Move done succesfully? " << pos.makeMove(m) << "\n\n";
+			//}*/
+
+		/*
+		std::string k;
     int i = -1;
     do {
       std::cout << "enter move: ";
@@ -49,17 +103,18 @@ int main(int argc, char *argv[])
       i = indexOf(moveVec, k);
     } while (i == -1);
     Move& m = moveVec[i];
-    */
+
+
     std::cout << "Doing move " << k << ", at " << indexOf(moveVec, k) << " piece = "
               << m.piece << " color = " << m.color << " from = "
               << m.getFrom() << " to = " << m.getTo() << " cpiece = "
               << m.cPiece << " ccolor = " << m.cColor
               << std::endl;
-    std::cout << "Move done succesfully? " << pos.makeMove(m) << "\n\n";
+
     n++;
   }
 
-  /*
+
   Magic t = Magic::bishopTable[20];
   std::cout << "MAGIC\n";
   printBitboardRows(t.magic);

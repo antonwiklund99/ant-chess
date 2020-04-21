@@ -3,7 +3,7 @@
 
 #include "position.h"
 
-Move minimaxComputeBestMove(Position);
+Move minimaxComputeBestMove(Position, int);
 float minimax(Position&, float, float, int, bool);
 float valueOfPos(const Position&);
 #endif

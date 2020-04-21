@@ -2,6 +2,8 @@
 #define UTIL_GUARD
 
 #include "enums.h"
+#include <string>
+#include <vector>
 
 int bitScanForward(Bitboard);
 int popFirstBit(Bitboard&);
@@ -28,4 +30,5 @@ Bitboard soWeWe(Bitboard b);
 Bitboard soSoWe(Bitboard b);
 
 void printBitboardRows(Bitboard);
+void split(std::string, std::vector<std::string>&, char);
 #endif

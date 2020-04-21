@@ -46,7 +46,13 @@ public:
   bool isCapture() const { return encodedMove & (CAPTURE_FLAG << 12); }
 
   unsigned int getButterflyIndex() const { return encodedMove & 0x0fff; }
-  void operator=(Move a) { encodedMove = a.encodedMove; }
+  void operator=(Move a) {
+		encodedMove = a.encodedMove;
+		piece = a.piece;
+		cPiece = a.cPiece;
+		color = a.color;
+		cColor = a.cColor;
+	}
   bool operator==(Move a) const { return (encodedMove & 0xffff) == (a.encodedMove & 0xffff); }
   bool operator!=(Move a) const { return (encodedMove & 0xffff) != (a.encodedMove & 0xffff); }
 

@@ -1,6 +1,9 @@
 #include <iostream>
 #include "utils.h"
 #include "enums.h"
+#include <string>
+#include <vector>
+using std::vector; using std::string;
 
 constexpr Bitboard debruijn64 = Bitboard(0x03f79d71b4cb0a89);
 constexpr int index64[64] = {
@@ -39,6 +42,21 @@ void printBitboardRows(Bitboard b) {
       std::cout << "\n";
   }
   std::cout << std::endl;
+}
+
+void split(string s, vector<string>& res, char delim) {
+	res.clear();
+	string b = "";
+	for (size_t i = 0; i != s.size(); i++) {
+		if (s[i] == delim && b != "") {
+			res.push_back(b);
+			b = "";
+		}
+		else {
+			b += s[i];
+		}
+	}
+	if (!b.empty()) res.push_back(b);
 }
 
 Bitboard northOne(Bitboard b) { return b << 8; }

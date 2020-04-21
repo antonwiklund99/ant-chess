@@ -1,10 +1,10 @@
-SOURCES=src/utils.cpp src/main.cpp src/piecePatterns.cpp src/board.cpp src/position.cpp src/move.cpp src/magic.cpp src/minimax.cpp
-HEADERS=include/utils.h include/piecePatterns.h include/board.h include/position.h include/move.h include/magic.h include/enums.h include/minimax.h
+SOURCES=src/utils.cpp src/uci.cpp src/main.cpp src/piecePatterns.cpp src/board.cpp src/position.cpp src/move.cpp src/magic.cpp src/minimax.cpp
+HEADERS=include/utils.h include/piecePatterns.h include/board.h include/position.h include/move.h include/magic.h include/enums.h include/minimax.h include/uci.h
 OBJECTS=$(patsubst src/%.cpp, src/%.o, $(SOURCES))
 
 CC=g++
 CPPFLAGS=-Wall -g -O2 -Iinclude
-LIBS=-lSDL2
+LIBS=-lpthread
 
 main: $(OBJECTS)
 	$(CC) $(CPPFLAGS) $(OBJECTS) $(LIBS) -o main

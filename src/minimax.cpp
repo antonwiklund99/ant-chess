@@ -10,37 +10,34 @@
 using std::max; using std::min;
 using std::sort; using std::vector;
 
-#define SEARCH_DEPTH 10
-
 // The side that we are computing the best move for, used in valueOfPos function
 // to decide who to value it for
 Color currentTurn;
 
-Move minimaxComputeBestMove(Position original) {
-  std::cout << "Starting minimax search" << std::endl;
-  Move* bestMove = nullptr;
+Move minimaxComputeBestMove(Position original, int depth) {
+  int bestMove = 0;
   float bestScore = -251, score, alfa = -251, beta = 251;
-  vector<Move> moves;
+  vector<Move> moves = legalMoves(original);
   currentTurn = original.turn;
-  generateMoves(original, moves, original.turn);
   sort(moves.begin(), moves.end(), [](const Move& a, const Move& b) {
                                      return a.isCapture() > b.isCapture();
                                    });
-  for (int i = 0; i < moves.size(); i++) {
-    Move* m = &moves[i];
-    std::cout << "Calculating minimax for move " << m->notation();
-    original.makeMove(*m);
-    score = minimax(original, alfa , beta, SEARCH_DEPTH, false);
+  for (size_t i = 0; i < moves.size(); i++) {
+    Move m = moves[i];
+		std::cout << "info currmove " << m.notation() << " currmovenumber " << i + 1 << std::endl;
+    original.makeMove(m);
+    score = minimax(original, alfa , beta, depth, false);
+
     alfa = max(alfa, score);
-    std::cout << ", score = " << score << std::endl;
     if (score > bestScore) {
       bestScore = score;
-      bestMove = &moves[i];
+      bestMove = i;
     }
-    original.unmakeMove(*m);
+    original.unmakeMove(m);
   }
-
-  return *bestMove;
+	std::cout << "info score cp " << ((int) bestScore) << " pv " << moves[bestMove].notation() <<
+		std::endl;
+  return moves[bestMove];
 }
 
 // Minimax function with alfabeta pruning
@@ -65,13 +62,13 @@ float minimax(Position& pos, float alfa, float beta, int depth, bool maximizingP
         checkmate = false;
         value = max(value, minimax(pos, alfa, beta, depth - 1, false));
         alfa = max(alfa, value);
+				pos.unmakeMove(m);
         if (alfa >= beta)
           break;
         /* Kanske skulle vara bättre att skicka med move som argument och göra makeMove i början
          av funktionen och undvika den här unmake:n. Jobbiga med det var att ta reda på
          checkmate/stalemate då eftersom generateMoves genererar pseudo legal moves, nivån
          ovanför skulle inte veta att move:t inte var legit*/
-        pos.unmakeMove(m);
       }
     }
   }
@@ -82,9 +79,9 @@ float minimax(Position& pos, float alfa, float beta, int depth, bool maximizingP
         checkmate = false;
         value = min(value, minimax(pos, alfa, beta, depth - 1, true));
         beta = min(beta, value);
+				pos.unmakeMove(m);
         if (alfa >= beta)
           break;
-        pos.unmakeMove(m);
       }
     }
   }
@@ -117,6 +114,13 @@ float valueOfPos(const Position& pos) {
   vector<Move> whiteMoves, blackMoves;
   generateMoves(pos, whiteMoves, cWhite);
   generateMoves(pos, blackMoves, cBlack);
-  value += 0.5*(whiteMoves.size() - blackMoves.size());
+	value += 0.5*(((float) whiteMoves.size()) - ((float) blackMoves.size()));
+
+	/*
+	if (value > 251) {
+		std::cout << "v1 = " << v1 << " v2 = " << v2 << "value = " << value << std::endl;
+		std::cout << (float) whiteMoves.size() << " " << (float) blackMoves.size() << std::endl;
+	}
+	*/
   return value*(currentTurn == cWhite ? 1 : -1);
 }
