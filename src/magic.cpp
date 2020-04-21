@@ -148,14 +148,11 @@ constexpr int BBits[64] = {
 
 Magic Magic::bishopTable[64];
 Magic Magic::rookTable[64];
-std::atomic_bool Magic::magicSetUp(false);
 
 // https://www.chessprogramming.org/Looking_for_Magics
 void initMagic() {
   for (int sq = 0; sq < 64; sq++) {
     Magic::bishopTable[sq] = find_magic(sq, BBits[sq], true);
     Magic::rookTable[sq] = find_magic(sq, RBits[sq], false);
-    //std::cout << "Found magic for " << sq + 1<< "/64" << std::endl;
   }
-	Magic::magicSetUp.store(true);
 }

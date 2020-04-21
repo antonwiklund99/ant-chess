@@ -12,13 +12,56 @@
 
 int main(int argc, char *argv[])
 {
-  //Board b("rnb1kbnr/pppp1ppp/8/4p3/6q1/4P3/PPPP1PPP/RNB1KBNR");
+	UCI::run();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
+	Position pos("1r3r2/ppp1kP1p/3pppp1/8/1BnP1P2/P3PK2/6NP/8 w KQkq - 0 1");
+	initMagic();
+	PiecePatterns::initEasyBitboards();
+	std::cout << "turn=" << (pos.turn == cWhite ? "w" : "b") << std::endl;
+	std::cout << pos.board;
+	std::vector<Move> ps;
+	generateMoves(pos, ps);
+	std::vector<Move> x = legalMoves(pos);
+
+	std::cout << "LEGAL:\n";
+	for (auto& i: x) std::cout << i.notation() << std::endl;
+	std::cout << "\nPSEUDO\n";
+	for (auto& i: ps) std::cout << i.notation() << std::endl;
+
+	int i = indexOf(ps, "f3g3");
+	std::cout << i << std::endl;
+
+	Move m = ps[i];
+	std::cout << "FROM="<< m.getFrom() << std::endl;
+	std::cout << "TO="<<m.getTo() << std::endl;
+	std::cout << pos.makeMove(m) << std::endl;
+	std::cout << pos.board;
+
+		  //Board b("rnb1kbnr/pppp1ppp/8/4p3/6q1/4P3/PPPP1PPP/RNB1KBNR");
   Board b;
   Position pos("r1b1k2r/ppppbppp/4p3/8/6K1/6P1/PP1n1P1P/nN6 w KQkq - 0 1");
 	initMagic();
 	PiecePatterns::initEasyBitboards();
-	//Board b("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R");
-	//std::cout << b;
+
 	std::cout << pos.board;
 	std::vector<Move> x = legalMoves(pos);
 	std::vector<Move> x2;
@@ -28,38 +71,7 @@ int main(int argc, char *argv[])
 	for (auto i: x) std::cout << i.notation() << std::endl;
 	std::cout << "LEGAL" << std::endl;
 	for (auto i: x2) std::cout << i.notation() << std::endl;
-	/*
 
-
-
-	try {
-			UCI::run();
-	} catch (std::invalid_argument e) {
-		std::cout << e.what() << std::endl;
-	}
-	*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/*
   std::vector<Move> moveVec;
   int n = 0;
   while (n < 20 && legalMoves(pos).size() != 0) {

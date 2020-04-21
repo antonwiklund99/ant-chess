@@ -3,7 +3,7 @@ HEADERS=include/utils.h include/piecePatterns.h include/board.h include/position
 OBJECTS=$(patsubst src/%.cpp, src/%.o, $(SOURCES))
 
 CC=g++
-CPPFLAGS=-Wall -g -O2 -Iinclude
+CPPFLAGS=-Wall -g -O3 -Iinclude
 LIBS=-lpthread
 
 main: $(OBJECTS)

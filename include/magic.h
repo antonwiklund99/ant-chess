@@ -7,7 +7,6 @@
 struct Magic {
   static Magic rookTable[64];
   static Magic bishopTable[64];
-	static std::atomic_bool magicSetUp;
   Bitboard ptr[4096];
   Bitboard mask;
   Bitboard magic;

@@ -33,11 +33,11 @@ constexpr Bitboard RANK_7 = 0x00ff000000000000;
 constexpr Bitboard RANK_8 = 0xff00000000000000;
 
 constexpr Bitboard notAFile = 0xfefefefefefefefe; // ~0x0101010101010101
-constexpr Bitboard notBFile = notAFile << 1;
-constexpr Bitboard notCFile = notAFile << 2;
-constexpr Bitboard notDFile = notAFile << 3;
-constexpr Bitboard notEFile = notAFile << 4;
-constexpr Bitboard notFFile = notAFile << 5;
-constexpr Bitboard notGFile = notAFile << 6;
+constexpr Bitboard notBFile = (notAFile << 1) + 1;
+constexpr Bitboard notCFile = (notBFile << 1) + 1;
+constexpr Bitboard notDFile = (notCFile << 1) + 1;
+constexpr Bitboard notEFile = (notDFile << 1) + 1;
+constexpr Bitboard notFFile = (notEFile << 1) + 1;
+constexpr Bitboard notGFile = (notFFile << 1) + 1;
 constexpr Bitboard notHFile = 0x7f7f7f7f7f7f7f7f; // ~0x8080808080808080
 #endif

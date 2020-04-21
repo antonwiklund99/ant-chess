@@ -17,7 +17,7 @@ string Move::notation() {
 string indexToCordinate(unsigned int i) {
   string ret;
   char file = (i % 8) + 'a';
-  char rank = (i/8 + 1) + '0';
+  char rank = (i / 8) + '1';
   ret += file;
   ret += rank;
   return ret;

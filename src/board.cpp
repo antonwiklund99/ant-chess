@@ -74,8 +74,8 @@ void Board::reset() {
 bool Board::isAttacked(Bitboard target, Color attackingColor) const {
   int sq = bitScanForward(target);
   if (attackingColor == cWhite) {
-    Bitboard pawns = getBlackPawns();
-    if (wPawnWestAttack(target, pawns) | wPawnEastAttack(target, pawns)) return true;
+    Bitboard pawns = getWhitePawns();
+    if (wPawnWestAttack(pawns, target) | wPawnEastAttack(pawns, target)) return true;
 
     Bitboard sliders = getWhiteBishops() | getWhiteQueen();
     const Magic& m1 = Magic::bishopTable[sq];
@@ -88,8 +88,8 @@ bool Board::isAttacked(Bitboard target, Color attackingColor) const {
     if (m2.ptr[transform(occ, m2.magic, m2.shift)] & sliders) return true;
   }
   else {
-    Bitboard pawns = getWhitePawns();
-    if (bPawnWestAttack(target, pawns) | bPawnEastAttack(target, pawns)) return true;
+    Bitboard pawns = getBlackPawns();
+    if (bPawnWestAttack(pawns, target) | bPawnEastAttack(pawns, target)) return true;
 
     Bitboard sliders = getBlackBishops() | getBlackQueen();
     const Magic& m1 = Magic::bishopTable[sq];
