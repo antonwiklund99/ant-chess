@@ -1,0 +1,18 @@
+GENERATE PSEUDO-LEGAL MOVES
+average time = 1396.06 ns
+average time = 139.21 ns
+average time = 119.1 ns
+average time = 1524.62 ns
+average time = 277.19 ns
+GENERATE LEGAL MOVES
+average time = 1322.96 ns
+average time = 141.45 ns
+average time = 123.92 ns
+average time = 1475.6 ns
+average time = 273.13 ns
+BEST MOVE SEARCH (depth = 4)
+average time = 259.7 microseconds
+average time = 88.8 microseconds
+average time = 4.1 microseconds
+average time = 581.3 microseconds
+average time = 97 microseconds
