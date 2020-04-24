@@ -4,6 +4,7 @@
 #include "board.h"
 #include "move.h"
 #include "enums.h"
+#include <vector>
 
 class Position {
  public:

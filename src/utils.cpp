@@ -1,8 +1,8 @@
 #include <iostream>
-#include "utils.h"
-#include "enums.h"
 #include <string>
 #include <vector>
+#include "utils.h"
+#include "enums.h"
 using std::vector; using std::string;
 
 constexpr Bitboard debruijn64 = Bitboard(0x03f79d71b4cb0a89);
@@ -71,3 +71,12 @@ Bitboard northWestOne(Bitboard b) { return (b & notAFile) << 7; }
 Bitboard eastOne(Bitboard b) { return (b & notHFile) << 1; }
 Bitboard southEastOne(Bitboard b) { return (b & notHFile) >> 7; }
 Bitboard northEastOne(Bitboard b) { return (b & notHFile) << 9; }
+
+Bitboard noNoEa(Bitboard b) { return (b & notHFile ) << 17; }
+Bitboard noEaEa(Bitboard b) { return (b & (notGFile & notHFile)) << 10; }
+Bitboard soEaEa(Bitboard b) { return (b & (notGFile & notHFile)) >>  6; }
+Bitboard soSoEa(Bitboard b) { return (b & notHFile ) >> 15; }
+Bitboard noNoWe(Bitboard b) { return (b & notAFile ) << 15; }
+Bitboard noWeWe(Bitboard b) { return (b & (notAFile & notBFile)) <<  6; }
+Bitboard soWeWe(Bitboard b) { return (b & (notAFile & notBFile)) >> 10; }
+Bitboard soSoWe(Bitboard b) { return (b & notAFile ) >> 17; }

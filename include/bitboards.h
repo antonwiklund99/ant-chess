@@ -1,12 +1,12 @@
-#ifndef MAGIC_GUARD
-#define MAGIC_GUARD
+#ifndef BITBOARDS_GUARD
+#define BITBOARDS_GUARD
 
-#include <atomic>
 #include "enums.h"
 
 struct Magic {
   static Magic rookTable[64];
   static Magic bishopTable[64];
+	static void initMagic();
   Bitboard ptr[4096];
   Bitboard mask;
   Bitboard magic;
@@ -20,11 +20,12 @@ struct Magic {
   Magic() {}
 };
 
-void initMagic();
+namespace Bitboards {
+  void initEasyBitboards();
 
-int countOnes(Bitboard);
+  extern Bitboard knight[64];
+  extern Bitboard king[64];
+};
+
 int transform(Bitboard, Bitboard, int);
-Bitboard rookAttacks(int, Bitboard);
-Bitboard bishopAttacks(int, Bitboard);
-Bitboard rmask(int);
 #endif

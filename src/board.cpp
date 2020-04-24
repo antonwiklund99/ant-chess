@@ -6,8 +6,8 @@
 #include <stdexcept>
 #include "board.h"
 #include "move.h"
-#include "magic.h"
 #include "utils.h"
+#include "bitboards.h"
 #include <bits/stdc++.h>
 using std::ostream; using std::vector;
 using std::string;

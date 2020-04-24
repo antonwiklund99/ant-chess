@@ -1,7 +1,6 @@
 #ifndef MOVE_GUARD
 #define MOVE_GUARD
 
-#include <vector>
 #include <string>
 #include "enums.h"
 
@@ -61,6 +60,4 @@ public:
 private:
   unsigned int encodedMove;
 };
-
-std::string indexToCordinate(unsigned int);
 #endif

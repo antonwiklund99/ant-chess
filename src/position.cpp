@@ -1,7 +1,6 @@
 #include "board.h"
 #include "position.h"
-#include "magic.h"
-#include "piecePatterns.h"
+#include "bitboards.h"
 #include "utils.h"
 #include <vector>
 using std::string; using std::vector;
@@ -155,7 +154,7 @@ void generateMoves(const Position& pos, vector<Move>& moveVec, Color turn) {
 	if (knights) {
 		do {
       int origin = bitScanForward(knights);
-      Bitboard attacks = PiecePatterns::knight[origin] & ~own;
+      Bitboard attacks = Bitboards::knight[origin] & ~own;
       addFromBitboard(origin, attacks, pos, moveVec, opponent, turn, nKnight);
 		} while (knights &= knights - 1);
 	}
@@ -163,7 +162,7 @@ void generateMoves(const Position& pos, vector<Move>& moveVec, Color turn) {
   // King
 	if (king) {
 		int idx = bitScanForward(king);
-		Bitboard kingMoves = PiecePatterns::king[idx] & ~own;
+		Bitboard kingMoves = Bitboards::king[idx] & ~own;
 		addFromBitboard(idx, kingMoves, pos, moveVec, opponent, turn, nKing);
 	}
 

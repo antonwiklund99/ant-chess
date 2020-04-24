@@ -1,12 +1,10 @@
 #include <iostream>
 #include <chrono>
 #include <fstream>
-#include <string>
+#include <vector>
 #include "position.h"
 #include "move.h"
-#include "board.h"
-#include "magic.h"
-#include "piecePatterns.h"
+#include "bitboards.h"
 #include "minimax.h"
 using std::cout; using std::endl; using namespace std::chrono;
 
@@ -19,10 +17,11 @@ Position positions[] = {startPos, white1, white2, black1, black2};
 
 int main(int argc, char *argv[]) {
 	std::ofstream out("benchmarks.txt");
-	cout << "Setting up magic" << endl;
-	initMagic();
-	cout << "done\nSetting up piecepatternsm";
-	PiecePatterns::initEasyBitboards();
+	cout << "Setting up magic...";
+	std::flush(cout);
+	Magic::initMagic();
+	cout << "done\nSetting up bitboards..";
+	Bitboards::initEasyBitboards();
 	cout << "done" << endl;
 
 	out << "GENERATE PSEUDO-LEGAL MOVES" << endl;
@@ -56,7 +55,7 @@ int main(int argc, char *argv[]) {
 		float sum = 0;
 		for (int i = 0; i < 10; i++) {
 			auto start = high_resolution_clock::now();
-			minimaxComputeBestMove(pos, depth);
+			minimaxComputeBestMove(pos, depth, false);
 			auto stop = high_resolution_clock::now();
 			sum += duration_cast<milliseconds>(stop -start).count();
 		}

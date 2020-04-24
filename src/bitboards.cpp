@@ -1,8 +1,27 @@
-#include "magic.h"
 #include "utils.h"
+#include "bitboards.h"
 #include <stdexcept>
-#include <iostream>
 
+Bitboard Bitboards::knight[64] = {};
+Bitboard Bitboards::king[64] = {};
+
+void Bitboards::initEasyBitboards() {
+  Bitboard b = 1;
+  for (int i = 0; i != 64; ++i) {
+    // Knight
+    knight[i] = noNoEa(b) | noEaEa(b) | soEaEa(b) | soSoEa(b) |
+         noNoWe(b) | noWeWe(b) | soWeWe(b) | soSoWe(b);
+
+    // King
+    king[i] = northOne(b) | southOne(b) | westOne(b) | eastOne(b) |
+      southWestOne(b) | southEastOne(b) | northEastOne(b) | northWestOne(b);
+    b <<= 1;
+  }
+}
+
+/***********************
+ * Magic stuff
+ ***********************/
 Bitboard randomBitboard() {
   Bitboard u1, u2, u3, u4;
   u1 = (Bitboard)(random()) & 0xFFFF; u2 = (Bitboard)(random()) & 0xFFFF;
@@ -150,7 +169,7 @@ Magic Magic::bishopTable[64];
 Magic Magic::rookTable[64];
 
 // https://www.chessprogramming.org/Looking_for_Magics
-void initMagic() {
+void Magic::initMagic() {
   for (int sq = 0; sq < 64; sq++) {
     Magic::bishopTable[sq] = find_magic(sq, BBits[sq], true);
     Magic::rookTable[sq] = find_magic(sq, RBits[sq], false);

@@ -1,13 +1,12 @@
-#include <iostream>
-#include <vector>
-//#include <chrono>
-//#include "position.h"
-//#include "board.h"
-#include "move.h"
-#include "piecePatterns.h"
-#include "magic.h"
-//#include "minimax.h"
-#include "utils.h"
+// #include <iostream>
+// #include <vector>
+// #include <chrono>
+// #include "position.h"
+// #include "board.h"
+// #include "move.h"
+// #include "bitboards.h"
+// #include "minimax.h"
+// #include "utils.h"
 #include "uci.h"
 
 int main(int argc, char *argv[])

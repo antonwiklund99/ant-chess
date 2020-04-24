@@ -49,8 +49,8 @@ class Board {
   // 0 - 1 = each colors bitboard
   // 2 - 7 = each piece types bitboard
   Bitboard pieceBitboards[8];
-
 };
+
 Bitboard wSinglePush(Bitboard, Bitboard);
 Bitboard bSinglePush(Bitboard, Bitboard);
 Bitboard wDoublePush(Bitboard, Bitboard);

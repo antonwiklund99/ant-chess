@@ -14,7 +14,7 @@ using std::sort; using std::vector;
 // to decide who to value it for
 Color currentTurn;
 
-Move minimaxComputeBestMove(Position original, int depth) {
+Move minimaxComputeBestMove(Position original, int depth, bool info) {
   int bestMove = 0;
   float bestScore = -251, score, alfa = -251, beta = 251;
   vector<Move> moves = legalMoves(original);
@@ -24,7 +24,8 @@ Move minimaxComputeBestMove(Position original, int depth) {
                                    });
   for (size_t i = 0; i < moves.size(); i++) {
     Move m = moves[i];
-		std::cout << "info currmove " << m.notation() << " currmovenumber " << i + 1 << std::endl;
+		if (info)
+			std::cout << "info currmove " << m.notation() << " currmovenumber " << i + 1 << std::endl;
     original.makeMove(m);
     score = minimax(original, alfa , beta, depth, false);
 
@@ -35,9 +36,14 @@ Move minimaxComputeBestMove(Position original, int depth) {
     }
     original.unmakeMove(m);
   }
-	std::cout << "info score cp " << ((int) bestScore) << " pv " << moves[bestMove].notation() <<
+	if (info)
+		std::cout << "info score cp " << ((int) bestScore) << " pv " << moves[bestMove].notation() <<
 		std::endl;
   return moves[bestMove];
+}
+
+Move minimaxComputeBestMove(Position p, int d) {
+	return minimaxComputeBestMove(p, d, true);
 }
 
 // Minimax function with alfabeta pruning
