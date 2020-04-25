@@ -61,8 +61,8 @@ Board::Board(string s) {
 }
 
 void Board::reset() {
+	pieceBitboards[0] = 0x000000000000ffff;
 	pieceBitboards[1] = 0xffff000000000000;
-  pieceBitboards[0] = 0x000000000000ffff;
   pieceBitboards[2] = 0x00ff00000000ff00;
   pieceBitboards[3] = 0x4200000000000042;
   pieceBitboards[4] = 0x2400000000000024;

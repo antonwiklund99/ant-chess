@@ -7,6 +7,7 @@
 #include "bitboards.h"
 #include "minimax.h"
 using std::cout; using std::endl; using namespace std::chrono;
+using std::vector;
 
 Position startPos;
 Position white1("1r3r2/ppp1kP1p/3pppp1/8/1BnP1P2/P3PK2/6NP/8 w KQkq - 0 1");
@@ -15,7 +16,59 @@ Position black1("rnbqk2r/pp3ppp/5n2/3p2B1/1b1P4/2N2N2/PP2PPPP/R2QKB1R b KQkq - 3
 Position black2("2kr1br1/pp3p1p/2p2n2/2p3p1/2P5/1P1bP3/PB1P1PPP/R2NK2R b KQ - 1 12");
 Position positions[] = {startPos, white1, white2, black1, black2};
 
+int captures = 0;
+
+// DET HÄR BORDE LIGGA I EN TEST SUITE
+Bitboard perft(int depth, Position& pos) {
+	// https://www.chessprogramming.net/perfect-perft/
+	// GER inte rätt för depth > 3 MEN det beror antaglingen på att castling och en-passant inte
+	// är implementerat
+	if (depth == 0)
+		return 1;
+	int nodes = 0;
+	vector<Move> moves;
+	generateMoves(pos, moves);
+
+	for (auto m: moves) {
+		if (pos.makeMove(m)) {
+			if (m.isCapture()) captures++;
+			nodes += perft(depth - 1, pos);
+			pos.unmakeMove(m);
+		}
+	}
+	return nodes;
+}
+
+Bitboard expected[7] = {
+											 1,
+											 20,
+											 400,
+											 8902,
+											 197281,
+											 4865609,
+                       };
+
 int main(int argc, char *argv[]) {
+	cout << "Setting up bitboards and magic...";
+	cout.flush();
+	Magic::initMagic();
+	Bitboards::initEasyBitboards();
+	cout << "done\nStarting perft verification..." << endl;
+	for (int i = 0; i < 6; i++) {
+		captures = 0;
+		cout << "Depth " << i << ": ";
+		cout.flush();
+		Bitboard d = perft(i, startPos);
+		if (d == expected[i]) {
+			cout << "ok" << " captures = " << captures << endl;
+		}
+		else {
+			cout << "failed, expected " << expected[i] << " got " << d << " captures=" << captures <<
+				endl;
+			return 1;
+		}
+	}
+
 	std::ofstream out("benchmarks.txt");
 	cout << "Setting up magic...";
 	std::flush(cout);
