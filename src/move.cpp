@@ -12,10 +12,11 @@ string indexToCordinate(unsigned int i) {
 }
 
 string Move::notation() {
+	u_int flags = getFlags();
+	if (flags == KING_CASTLE_FLAG) return "0-0";
+	if (flags == QUEEN_CASTLE_FLAG) return "0-0-0";
   string ret;
-	if (piece != nPawn) {
-
-	}
+	//if (piece != nPawn)
   ret = indexToCordinate(getFrom());
   //ret += ((isCapture()) ? 'x' : '-');
   ret += indexToCordinate(getTo());

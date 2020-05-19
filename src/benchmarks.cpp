@@ -19,25 +19,6 @@ Position positions[] = {startPos, white1, white2, black1, black2};
 int captures = 0;
 
 // DET HÄR BORDE LIGGA I EN TEST SUITE
-Bitboard perft(int depth, Position& pos) {
-	// https://www.chessprogramming.net/perfect-perft/
-	// GER inte rätt för depth > 3 MEN det beror antaglingen på att castling och en-passant inte
-	// är implementerat
-	if (depth == 0)
-		return 1;
-	int nodes = 0;
-	vector<Move> moves;
-	generateMoves(pos, moves);
-
-	for (auto m: moves) {
-		if (pos.makeMove(m)) {
-			if (m.isCapture()) captures++;
-			nodes += perft(depth - 1, pos);
-			pos.unmakeMove(m);
-		}
-	}
-	return nodes;
-}
 
 Bitboard expected[7] = {
 											 1,
@@ -65,7 +46,6 @@ int main(int argc, char *argv[]) {
 		else {
 			cout << "failed, expected " << expected[i] << " got " << d << " captures=" << captures <<
 				endl;
-			return 1;
 		}
 	}
 

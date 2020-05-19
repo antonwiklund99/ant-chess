@@ -17,6 +17,7 @@ constexpr int index64[64] = {
                              25, 14, 19,  9, 13,  8,  7,  6
 };
 
+
 int bitScanForward(Bitboard b) {
   return index64[((b & -b) * debruijn64) >> 58];
 }

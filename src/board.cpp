@@ -72,35 +72,36 @@ void Board::reset() {
 }
 
 bool Board::isAttacked(Bitboard target, Color attackingColor) const {
-  int sq = bitScanForward(target);
-  if (attackingColor == cWhite) {
-    Bitboard pawns = getWhitePawns();
-    if (wPawnWestAttack(pawns, target) | wPawnEastAttack(pawns, target)) return true;
+	Bitboard pawns, line, diagonal, knights;
+	if (attackingColor == cWhite) {
+		pawns = getWhitePawns();
+		if (wPawnWestAttack(pawns, target) | wPawnEastAttack(pawns, target)) return true;
+		diagonal = getWhiteBishops() | getWhiteQueen();
+		line = getWhiteRooks() | getWhiteQueen();
+		knights = getWhiteKnights();
+	}
+	else {
+		pawns = getBlackPawns();
+		if (bPawnWestAttack(pawns, target) | bPawnEastAttack(pawns, target)) return true;
+		diagonal = getBlackBishops() | getBlackQueen();
+		line = getBlackRooks() | getBlackQueen();
+		knights = getBlackKnights();
+	}
 
-    Bitboard sliders = getWhiteBishops() | getWhiteQueen();
-    const Magic& m1 = Magic::bishopTable[sq];
-    Bitboard occ = m1.mask & getOccupied();
-    if (m1.ptr[transform(occ, m1.magic, m1.shift)] & sliders) return true;
+	int sq;
+	if (target) do {
+			sq = bitScanForward(target);
 
-    sliders = getWhiteRooks() | getWhiteQueen();
-    const Magic& m2 = Magic::rookTable[sq];
-    occ = m2.mask & getOccupied();
-    if (m2.ptr[transform(occ, m2.magic, m2.shift)] & sliders) return true;
-  }
-  else {
-    Bitboard pawns = getBlackPawns();
-    if (bPawnWestAttack(pawns, target) | bPawnEastAttack(pawns, target)) return true;
+			if (Bitboards::knight[sq] & knights) return true;
 
-    Bitboard sliders = getBlackBishops() | getBlackQueen();
-    const Magic& m1 = Magic::bishopTable[sq];
-    Bitboard occ = m1.mask & getOccupied();
-    if (m1.ptr[transform(occ, m1.magic, m1.shift)] & sliders) return true;
+			const Magic& m1 = Magic::bishopTable[sq];
+			Bitboard occ = m1.mask & getOccupied();
+			if (m1.ptr[transform(occ, m1.magic, m1.shift)] & diagonal) return true;
 
-    sliders = getBlackRooks() | getBlackQueen();
-    const Magic& m2 = Magic::rookTable[sq];
-    occ = m2.mask & getOccupied();
-    if (m2.ptr[transform(occ, m2.magic, m2.shift)] & sliders) return true;
-  }
+			const Magic& m2 = Magic::rookTable[sq];
+			occ = m2.mask & getOccupied();
+			if (m2.ptr[transform(occ, m2.magic, m2.shift)] & line) return true;
+		} while (target &= target - 1);
   return false;
 }
 
@@ -116,6 +117,17 @@ void Board::unsafeMakeMove(const Move& m) {
     pieceBitboards[m.cPiece] ^= toBB;
     pieceBitboards[m.cColor] ^= toBB;
   }
+	else if (m.isQueenCastle()) {
+		// lazy, can be improved
+		fromToBB = (fromBB ^ (toBB >> 1)) >> 1;
+		pieceBitboards[nRook] ^= fromToBB;
+		pieceBitboards[m.color] ^= fromToBB;
+	}
+	else if (m.isKingCastle()) {
+		fromToBB <<= 1;
+		pieceBitboards[nRook] ^= fromToBB;
+		pieceBitboards[m.color] ^= fromToBB;
+	}
 }
 
 Piece Board::pieceOnSq(int n) const {

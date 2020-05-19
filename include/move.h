@@ -41,8 +41,9 @@ public:
   void setFrom(unsigned int from) { encodedMove &= ~0xfc0; encodedMove |= (from & 0x3f) << 6; }
   void setFlags(unsigned int flags) { encodedMove &= ~0xf000; encodedMove |= (flags & 0xf) << 12; }
 
-  // More is flags?
-  bool isCapture() const { return encodedMove & (CAPTURE_FLAG << 12); }
+  bool isCapture() const { return (encodedMove >> 12) == CAPTURE_FLAG; }
+	bool isKingCastle() const { return (encodedMove >> 12) == KING_CASTLE_FLAG; }
+	bool isQueenCastle() const { return (encodedMove >> 12) == QUEEN_CASTLE_FLAG; }
 
   unsigned int getButterflyIndex() const { return encodedMove & 0x0fff; }
   void operator=(Move a) {

@@ -3,7 +3,9 @@
 #include "bitboards.h"
 #include "utils.h"
 #include <vector>
+#include <algorithm>
 using std::string; using std::vector;
+using std::find;
 
 Position::Position(string fen) {
 	vector<string> args;
@@ -13,12 +15,24 @@ Position::Position(string fen) {
 	Board b(args[0]);
 	board = b;
 	turn = (args[1] == "w") ? cWhite : cBlack;
-	// TODO CASTLING STUFF
+
+	bKingsideCastling = wKingsideCastling = bQueensideCastling = wQueensideCastling = false;
+	for (char c: args[2]) {
+		if (c == 'K')      wKingsideCastling  = true;
+		else if (c == 'k') bKingsideCastling  = true;
+		else if (c == 'Q') wQueensideCastling = true;
+		else if (c == 'q') bQueensideCastling = true;
+	}
+
 	// TODO EN PASSANT
-	wcastling = true;
-	bcastling = true;
+
 	halfMoveClock = std::stoi(args[4]);
 	fullMoveNumber = std::stoi(args[5]);
+}
+
+Info* Position::getInfo() {
+  return new Info((wKingsideCastling) + (wQueensideCastling << 1) + (bKingsideCastling << 2) +
+									(bQueensideCastling << 3) + (halfMoveClock << 4));
 }
 
 bool Position::makeMove(const Move& m) {
@@ -29,21 +43,49 @@ bool Position::makeMove(const Move& m) {
     return false;
   }
   else {
-		if (turn == cBlack) fullMoveNumber++;
-		if (m.isCapture() || m.piece == nPawn) {
-			halfMoveClock = 0;
+		states.push(getInfo());
+		if (turn == cBlack) {
+			fullMoveNumber++;
+			if (bKingsideCastling || bKingsideCastling) {
+				if (m.isKingCastle() || m.isQueenCastle() || m.piece == nKing)
+					bKingsideCastling = bQueensideCastling = false;
+				else if (m.piece == nRook) {
+					// kanske on'digt med första kollen (?)
+					if (bKingsideCastling && m.getFrom() == 63) bKingsideCastling = false;
+					else if (bQueensideCastling && m.getFrom() == 56) bQueensideCastling = false;
+				}
+			}
 		}
+		else {
+			if (wKingsideCastling || wKingsideCastling) {
+				if (m.isKingCastle() || m.isQueenCastle() || m.piece == nKing) {
+					wKingsideCastling = wQueensideCastling = false;
+				}
+				else if (m.piece == nRook) {
+					// kanske onödigt med första kollen (?)
+					if (wKingsideCastling && m.getFrom() == 7) wKingsideCastling = false;
+					else if (wQueensideCastling && m.getFrom() == 0) wQueensideCastling = false;
+				}
+			}
+		}
+		if (m.isCapture() || m.piece == nPawn) halfMoveClock = 0;
 		else halfMoveClock++;
     turn = (turn == cWhite ? cBlack : cWhite);
-    //castling stuff
     return true;
   }
 }
 
 void Position::unmakeMove(const Move&m) {
-	// THIS WILL FUCK UP HALFMOVECLOCK
 	if (turn == cWhite) fullMoveNumber--;
   turn = (turn == cWhite ? cBlack : cWhite);
+	Info* i = states.top();
+	states.pop();
+  wKingsideCastling = i->getWKingCastling();
+	bKingsideCastling = i->getBKingCastling();
+	wQueensideCastling = i->getWQueenCastling();
+	bQueensideCastling = i->getBQueenCastling();
+	halfMoveClock = i->getHalfMoveClock();
+	delete i;
   board.unsafeMakeMove(m);
 }
 
@@ -109,6 +151,16 @@ void generateMoves(const Position& pos, vector<Move>& moveVec, Color turn) {
         moveVec.push_back(Move(idx - 7, idx, CAPTURE_FLAG, nPawn, turn, pos.board.pieceOnSq(idx),
                                cBlack));
       } while (pawnWestAttacks &= pawnWestAttacks - 1);
+
+		// Castling
+		if (pos.wKingsideCastling && !(pos.board.getOccupied() & wKingsideSquares) &&
+				!pos.board.isAttacked(wKingsideSquares, cBlack)) {
+			moveVec.push_back(Move(4, 6, KING_CASTLE_FLAG, nKing, cWhite, nEmpty, cBlack));
+		}
+		if (pos.wQueensideCastling && !(pos.board.getOccupied() & wQueensideSquares) &&
+				!pos.board.isAttacked(wQueensidePassing, cBlack)) {
+			moveVec.push_back(Move(4, 2, QUEEN_CASTLE_FLAG, nKing, cWhite, nEmpty, cBlack));
+		}
   }
   else {
     own = pos.board.getBlacks();
@@ -147,6 +199,16 @@ void generateMoves(const Position& pos, vector<Move>& moveVec, Color turn) {
         int idx = bitScanForward(pawnWestAttacks);
         moveVec.push_back(Move(idx + 9, idx, 4, nPawn, cBlack, pos.board.pieceOnSq(idx), cWhite));
       } while (pawnWestAttacks &= pawnWestAttacks - 1);
+
+		// Castling
+		if (pos.bKingsideCastling && !(pos.board.getOccupied() & bKingsideSquares) &&
+				!pos.board.isAttacked(bKingsideSquares, cWhite)) {
+			moveVec.push_back(Move(60, 62, KING_CASTLE_FLAG, nKing, cBlack, nEmpty, cWhite));
+		}
+		if (pos.bQueensideCastling && !(pos.board.getOccupied() & bQueensideSquares) &&
+				!pos.board.isAttacked(bQueensidePassing, cWhite)) {
+			moveVec.push_back(Move(60, 58, QUEEN_CASTLE_FLAG, nKing, cBlack, nEmpty, cWhite));
+		}
   }
   // TODO: Add en-passant https://en.wikipedia.org/wiki/En_passant
 
@@ -212,4 +274,23 @@ vector<Move> legalMoves(Position &p) {
 		}
 	}
 	return x;
+}
+
+Bitboard perft(int depth, Position& pos) {
+	// https://www.chessprogramming.net/perfect-perft/
+	// GER inte rätt för depth > 3 MEN det beror antaglingen på att castling och en-passant inte
+	// är implementerat
+	if (depth == 0)
+		return 1;
+	int nodes = 0;
+	vector<Move> moves;
+	generateMoves(pos, moves);
+
+	for (auto m: moves) {
+		if (pos.makeMove(m)) {
+			nodes += perft(depth - 1, pos);
+			pos.unmakeMove(m);
+		}
+	}
+	return nodes;
 }

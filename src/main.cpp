@@ -1,20 +1,25 @@
-// #include <iostream>
+#include <iostream>
 // #include <vector>
 // #include <chrono>
-// #include "position.h"
-// #include "board.h"
-// #include "move.h"
-// #include "bitboards.h"
-// #include "minimax.h"
+#include "position.h"
+#include "board.h"
+#include "move.h"
+#include "enums.h"
+#include "bitboards.h"
+#include "minimax.h"
 // #include "utils.h"
 #include "uci.h"
 
 int main(int argc, char *argv[])
 {
 	UCI::run();
-
-
-
+	//minimaxComputeBestMove(pos, 5);
+	// std::cout <<
+	// 	" wKing = " << pos.wKingsideCastling <<
+	// 	" wQueensidecastling = " << pos.wQueensideCastling <<
+	// 	" bKingsidecastling = " << pos.bKingsideCastling <<
+	// 	" bQueensidecastling = " << pos.bQueensideCastling <<
+	// 	" halfmovelcok = " << pos.halfMoveClock << std::endl;
 
 
 

@@ -1,3 +1,5 @@
 TODO:
 * fix uci (fully support)
 * improve search (make multithreaded + better)
+* make a max-heap class for moves instead of std::vector (no need to sort etc.)
+* en-passant

@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "minimax.h"
 #include "bitboards.h"
+#include "position.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -137,6 +138,14 @@ namespace UCI {
 			}
 			else if (splitted[0] == "position") {
 				position(splitted);
+				//vector<Move> m;
+				//generateMoves(*pos, m);
+				//for (auto i: m) cout << i.notation() << endl;
+				// position fen rn2k2r/pp2p2p/2p1bp2/1q3nbP/P7/3p2P1/3P1P2/R3KBNR w KQkq - 1 18
+				// ger inte rätt board
+				//cout << "kingside black=" << pos->bKingsideCastling << " queenside black=" <<
+				//	pos->bQueensideCastling << "\nkingside white=" << pos->wKingsideCastling <<
+				//	" queenside white=" << pos->wQueensideCastling << endl;
 			}
 			else if (splitted[0] == "go") {
 				go(splitted);
@@ -146,6 +155,17 @@ namespace UCI {
 			}
 			else if (splitted[0] == "setoption") {
 				std::cout << "info str Engine has no options" << std::endl;
+			}
+			else if (splitted[0] == "perft") {
+				int nodes = 0;
+				for (auto m: legalMoves(*pos)) {
+					pos->makeMove(m);
+					int i = perft(std::stoi(splitted[1]) - 1, *pos);
+					nodes += i;
+					cout << m.notation() << ": " << i << endl;
+					pos->unmakeMove(m);
+				}
+				cout << "Nodes: " << nodes << endl;
 			}
 		}
 	}
