@@ -5,6 +5,6 @@
 
 Move minimaxComputeBestMove(Position, int, bool);
 Move minimaxComputeBestMove(Position, int);
-float minimax(Position&, float, float, int, bool);
-float valueOfPos(const Position&);
+float minimax(Position &, float, float, int, bool);
+float valueOfPos(const Position &);
 #endif

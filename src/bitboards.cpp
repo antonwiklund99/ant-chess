@@ -1,5 +1,5 @@
-#include "utils.h"
 #include "bitboards.h"
+#include "utils.h"
 #include <stdexcept>
 
 Bitboard Bitboards::knight[64] = {};
@@ -9,12 +9,13 @@ void Bitboards::initEasyBitboards() {
   Bitboard b = 1;
   for (int i = 0; i != 64; ++i) {
     // Knight
-    knight[i] = noNoEa(b) | noEaEa(b) | soEaEa(b) | soSoEa(b) |
-         noNoWe(b) | noWeWe(b) | soWeWe(b) | soSoWe(b);
+    knight[i] = noNoEa(b) | noEaEa(b) | soEaEa(b) | soSoEa(b) | noNoWe(b) |
+                noWeWe(b) | soWeWe(b) | soSoWe(b);
 
     // King
     king[i] = northOne(b) | southOne(b) | westOne(b) | eastOne(b) |
-      southWestOne(b) | southEastOne(b) | northEastOne(b) | northWestOne(b);
+              southWestOne(b) | southEastOne(b) | northEastOne(b) |
+              northWestOne(b);
     b <<= 1;
   }
 }
@@ -24,8 +25,10 @@ void Bitboards::initEasyBitboards() {
  ***********************/
 Bitboard randomBitboard() {
   Bitboard u1, u2, u3, u4;
-  u1 = (Bitboard)(random()) & 0xFFFF; u2 = (Bitboard)(random()) & 0xFFFF;
-  u3 = (Bitboard)(random()) & 0xFFFF; u4 = (Bitboard)(random()) & 0xFFFF;
+  u1 = (Bitboard)(random()) & 0xFFFF;
+  u2 = (Bitboard)(random()) & 0xFFFF;
+  u3 = (Bitboard)(random()) & 0xFFFF;
+  u4 = (Bitboard)(random()) & 0xFFFF;
   return u1 | (u2 << 16) | (u3 << 32) | (u4 << 48);
 }
 
@@ -35,76 +38,93 @@ Bitboard randomBitboardFewBits() {
 
 Bitboard rmask(int sq) {
   Bitboard ret = 0;
-  int rank = sq/8, file = sq % 8;
-  for (int r = rank + 1; r < 7; r++) ret |= (1ULL << (file + r*8));
-  for (int r = rank - 1; r > 0; r--) ret |= (1ULL << (file + r*8));
-  for (int f = file + 1; f < 7; f++) ret |= (1ULL << (f + rank*8));
-  for (int f = file - 1; f > 0; f--) ret |= (1ULL << (f + rank*8));
+  int rank = sq / 8, file = sq % 8;
+  for (int r = rank + 1; r < 7; r++)
+    ret |= (1ULL << (file + r * 8));
+  for (int r = rank - 1; r > 0; r--)
+    ret |= (1ULL << (file + r * 8));
+  for (int f = file + 1; f < 7; f++)
+    ret |= (1ULL << (f + rank * 8));
+  for (int f = file - 1; f > 0; f--)
+    ret |= (1ULL << (f + rank * 8));
   return ret;
 }
 
 Bitboard bmask(int sq) {
   Bitboard ret = 0;
-  int rank = sq/8, file = sq % 8, r, f;
-  for (r = rank + 1, f = file + 1; r <= 6 && f <= 6; r++, f++) ret |= (1ULL << (f + r*8));
-  for (r = rank + 1, f = file - 1; r <= 6 && f >= 1; r++, f--) ret |= (1ULL << (f + r*8));
-  for (r = rank - 1, f = file + 1; r >= 1 && f <= 6; r--, f++) ret |= (1ULL << (f + r*8));
-  for (r = rank - 1, f = file - 1; r >= 1 && f >= 1; r--, f--) ret |= (1ULL << (f + r*8));
+  int rank = sq / 8, file = sq % 8, r, f;
+  for (r = rank + 1, f = file + 1; r <= 6 && f <= 6; r++, f++)
+    ret |= (1ULL << (f + r * 8));
+  for (r = rank + 1, f = file - 1; r <= 6 && f >= 1; r++, f--)
+    ret |= (1ULL << (f + r * 8));
+  for (r = rank - 1, f = file + 1; r >= 1 && f <= 6; r--, f++)
+    ret |= (1ULL << (f + r * 8));
+  for (r = rank - 1, f = file - 1; r >= 1 && f >= 1; r--, f--)
+    ret |= (1ULL << (f + r * 8));
   return ret;
 }
 
 Bitboard rookAttacks(int sq, Bitboard block) {
   Bitboard result = 0ULL;
-  int rank = sq/8, file = sq % 8, r, f;
+  int rank = sq / 8, file = sq % 8, r, f;
   for (r = rank + 1; r <= 7; r++) {
-    result |= (1ULL << (r*8 + file));
-    if (block & (1ULL << (r*8 + file))) break;
+    result |= (1ULL << (r * 8 + file));
+    if (block & (1ULL << (r * 8 + file)))
+      break;
   }
   for (r = rank - 1; r >= 0; r--) {
-    result |= (1ULL << (r*8 + file));
-    if (block & (1ULL << (r*8 + file))) break;
+    result |= (1ULL << (r * 8 + file));
+    if (block & (1ULL << (r * 8 + file)))
+      break;
   }
   for (f = file + 1; f <= 7; f++) {
-    result |= (1ULL << (f + rank*8));
-    if (block & (1ULL << (f + rank*8))) break;
+    result |= (1ULL << (f + rank * 8));
+    if (block & (1ULL << (f + rank * 8)))
+      break;
   }
-  for(f = file - 1; f >= 0; f--) {
-    result |= (1ULL << (f + rank*8));
-    if (block & (1ULL << (f + rank*8))) break;
+  for (f = file - 1; f >= 0; f--) {
+    result |= (1ULL << (f + rank * 8));
+    if (block & (1ULL << (f + rank * 8)))
+      break;
   }
   return result;
 }
 
 Bitboard bishopAttacks(int sq, Bitboard block) {
   Bitboard result = 0ULL;
-  int rank = sq/8, file = sq%8, r, f;
+  int rank = sq / 8, file = sq % 8, r, f;
   for (r = rank + 1, f = file + 1; r <= 7 && f <= 7; r++, f++) {
-    result |= (1ULL << (f + r*8));
-    if (block & (1ULL << (f + r * 8))) break;
+    result |= (1ULL << (f + r * 8));
+    if (block & (1ULL << (f + r * 8)))
+      break;
   }
-  for(r = rank + 1, f = file - 1; r <= 7 && f >= 0; r++, f--) {
-    result |= (1ULL << (f + r*8));
-    if (block & (1ULL << (f + r * 8))) break;
+  for (r = rank + 1, f = file - 1; r <= 7 && f >= 0; r++, f--) {
+    result |= (1ULL << (f + r * 8));
+    if (block & (1ULL << (f + r * 8)))
+      break;
   }
-  for(r = rank - 1, f = file + 1; r >= 0 && f <= 7; r--, f++) {
-    result |= (1ULL << (f + r*8));
-    if (block & (1ULL << (f + r * 8))) break;
+  for (r = rank - 1, f = file + 1; r >= 0 && f <= 7; r--, f++) {
+    result |= (1ULL << (f + r * 8));
+    if (block & (1ULL << (f + r * 8)))
+      break;
   }
-  for(r = rank - 1, f = file - 1; r >= 0 && f >= 0; r--, f--) {
-    result |= (1ULL << (f + r*8));
-    if (block & (1ULL << (f + r * 8))) break;
+  for (r = rank - 1, f = file - 1; r >= 0 && f >= 0; r--, f--) {
+    result |= (1ULL << (f + r * 8));
+    if (block & (1ULL << (f + r * 8)))
+      break;
   }
   return result;
 }
 
-// Returns a bit combination from mask with a correct amount of bits (given by index)
-// up to totalBits
+// Returns a bit combination from mask with a correct amount of bits (given by
+// index) up to totalBits
 Bitboard indexToBitboard(int index, int totalBits, Bitboard m) {
   int j;
   Bitboard ret = 0;
   for (int i = 0; i < totalBits; i++) {
     j = popFirstBit(m);
-    if ((1 << i) & index) ret |= (1ULL << j);
+    if ((1 << i) & index)
+      ret |= (1ULL << j);
   }
   return ret;
 }
@@ -121,49 +141,41 @@ Magic find_magic(int sq, int m, int bishop) {
   mask = bishop ? bmask(sq) : rmask(sq);
   int n = countOnes(mask);
 
-  for(int i = 0; i < (1 << n); i++) {
+  for (int i = 0; i < (1 << n); i++) {
     b[i] = indexToBitboard(i, n, mask);
     a[i] = bishop ? bishopAttacks(sq, b[i]) : rookAttacks(sq, b[i]);
   }
 
-  for(int k = 0; k < 100000000; k++) {
+  for (int k = 0; k < 100000000; k++) {
     magic = randomBitboardFewBits();
-    if (countOnes((mask * magic) & 0xFF00000000000000ULL) < 6) continue;
-    for (i = 0; i < 4096; i++) used[i] = 0;
+    if (countOnes((mask * magic) & 0xFF00000000000000ULL) < 6)
+      continue;
+    for (i = 0; i < 4096; i++)
+      used[i] = 0;
     for (i = 0, fail = 0; !fail && i < (1 << n); i++) {
       j = transform(b[i], magic, m);
-      if (used[j] == 0ULL) used[j] = a[i];
-      else if (used[j] != a[i]) fail = 1;
+      if (used[j] == 0ULL)
+        used[j] = a[i];
+      else if (used[j] != a[i])
+        fail = 1;
     }
-    if(!fail) {
-     return Magic(used, mask, magic, n);
+    if (!fail) {
+      return Magic(used, mask, magic, n);
     }
   }
   throw std::runtime_error("Search for magic number failed");
 }
 
-constexpr int RBits[64] = {
-  12, 11, 11, 11, 11, 11, 11, 12,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  11, 10, 10, 10, 10, 10, 10, 11,
-  12, 11, 11, 11, 11, 11, 11, 12
-};
+constexpr int RBits[64] = {12, 11, 11, 11, 11, 11, 11, 12, 11, 10, 10, 10, 10,
+                           10, 10, 11, 11, 10, 10, 10, 10, 10, 10, 11, 11, 10,
+                           10, 10, 10, 10, 10, 11, 11, 10, 10, 10, 10, 10, 10,
+                           11, 11, 10, 10, 10, 10, 10, 10, 11, 11, 10, 10, 10,
+                           10, 10, 10, 11, 12, 11, 11, 11, 11, 11, 11, 12};
 
-constexpr int BBits[64] = {
-  6, 5, 5, 5, 5, 5, 5, 6,
-  5, 5, 5, 5, 5, 5, 5, 5,
-  5, 5, 7, 7, 7, 7, 5, 5,
-  5, 5, 7, 9, 9, 7, 5, 5,
-  5, 5, 7, 9, 9, 7, 5, 5,
-  5, 5, 7, 7, 7, 7, 5, 5,
-  5, 5, 5, 5, 5, 5, 5, 5,
-  6, 5, 5, 5, 5, 5, 5, 6
-};
-
+constexpr int BBits[64] = {6, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 5, 5, 5, 5,
+                           5, 5, 7, 7, 7, 7, 5, 5, 5, 5, 7, 9, 9, 7, 5, 5,
+                           5, 5, 7, 9, 9, 7, 5, 5, 5, 5, 7, 7, 7, 7, 5, 5,
+                           5, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 5, 5, 6};
 
 Magic Magic::bishopTable[64];
 Magic Magic::rookTable[64];

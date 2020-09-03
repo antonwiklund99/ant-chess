@@ -5,22 +5,19 @@
 
 typedef uint64_t Bitboard;
 
-enum Color {
-            cWhite = 0,
-            cBlack = 1
-};
+enum Color { cWhite = 0, cBlack = 1 };
 
 // Represents each bitboard type in board class
 enum Piece {
-                nWhite,
-                nBlack,
-                nPawn,
-                nKnight,
-                nBishop,
-                nRook,
-                nQueen,
-                nKing,
-                nEmpty
+  nWhite,
+  nBlack,
+  nPawn,
+  nKnight,
+  nBishop,
+  nRook,
+  nQueen,
+  nKing,
+  nEmpty
 };
 
 constexpr Bitboard RANK_1 = 0x00000000000000ff;

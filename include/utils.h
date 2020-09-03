@@ -6,7 +6,7 @@
 #include <vector>
 
 int bitScanForward(Bitboard);
-int popFirstBit(Bitboard&);
+int popFirstBit(Bitboard &);
 int countOnes(Bitboard);
 
 Bitboard northOne(Bitboard);
@@ -30,5 +30,5 @@ Bitboard soWeWe(Bitboard b);
 Bitboard soSoWe(Bitboard b);
 
 void printBitboardRows(Bitboard);
-void split(std::string, std::vector<std::string>&, char);
+void split(std::string, std::vector<std::string> &, char);
 #endif
