@@ -1,18 +1,14 @@
-TESTCASES=$(wildcard *.cpp)
-SOURCES=$(wildcard ../src/*.cpp)
-HEADERS=../include/board.h ../include/move.h ../include/piece.h
-OBJECTS=$(patsubst %.cpp, %.o, $(TESTCASES))
+SOURCES=../src/piecePatterns.cpp ../src/piece.cpp ../src/board.cpp ../src/position.cpp ../src/move.cpp ../src/magic.cpp boardTest.cpp
+HEADERS=../include/piecePatterns.h ../include/board.h ../include/piece.h ../include/position.h ../include/move.h ../include/magic.h
+OBJECTS=$(patsubst %.cpp, %.o, $(SOURCES))
 
 CC=g++
 CPPFLAGS=-Wall -g -I../include
+LIBS=-lboost_unit_test_framework
 
-test: board_test.o move_test.o piece_test.o
-	$(CC) $(CPPFLAGS) board_test.o move_test.o piece_test.o -lboost_unit_test_framework -o test
-board_test.o: $(HEADERS) board_test.cpp $(SOURCES)
-	$(CC) $(CPPFLAGS) -c board_test.cpp $(SOURCES) -lboost_unit_test_framework
-piece_test.o: $(HEADERS) piece_test.cpp $(SOURCES)
-	$(CC) $(CPPFLAGS) -c piece_test.cpp $(SOURCES) -lboost_unit_test_framework
-move_test.o: $(HEADERS) move_test.cpp $(SOURCES)
-	$(CC) $(CPPFLAGS) -c move_test.cpp $(SOURCES) -lboost_unit_test_framework
+test: boardTest.o
+	$(CC) $(CPPFLAGS) $(OBJECTS) $(LIBS) -o test
+$(OBJECTS): %.o : %.cpp $(HEADERS)
+	$(CC) $(CPPFLAGS) -c $< -o $@
 clean:
 	rm -f test *.o

@@ -1,3 +1,5 @@
 *~
 TAGS
 compile_commands.json
+*.o
+main

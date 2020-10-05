@@ -1,12 +1,10 @@
 #ifndef MINIMAX_GUARD
 #define MINIMAX_GUARD
 
-#include <vector>
-#include <string>
-#include "board.h"
-#include "move.h"
+#include "position.h"
 
-Move minimaxComputeBestMove(const Board&);
-float minimax(Board, const std::string&, float, float, int, bool);
-float valueOfBoard(const Board&);
+Move minimaxComputeBestMove(Position, int, bool);
+Move minimaxComputeBestMove(Position, int);
+float minimax(Position &, float, float, int, bool);
+float valueOfPos(const Position &);
 #endif
