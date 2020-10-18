@@ -1,18 +1,26 @@
+PERFT:
+0: 241 ns
+1: 16846 ns
+2: 72460 ns
+3: 1193062 ns
+4: 23223286 ns
+5: 504020094 ns
+6: 13375696651 ns
 GENERATE PSEUDO-LEGAL MOVES
-average time = 1358.57 ns
-average time = 177.77 ns
-average time = 121.37 ns
-average time = 1469.83 ns
-average time = 364.57 ns
+average time = 1328.09 ns
+average time = 205.17 ns
+average time = 129.76 ns
+average time = 1552.64 ns
+average time = 449.68 ns
 GENERATE LEGAL MOVES
-average time = 1273.03 ns
-average time = 172.12 ns
-average time = 121.05 ns
-average time = 1447.1 ns
-average time = 258.71 ns
-BEST MOVE SEARCH (depth = 4)
-average time = 250.9 microseconds
-average time = 142.8 microseconds
-average time = 5.3 microseconds
-average time = 809.4 microseconds
-average time = 104.2 microseconds
+average time = 1878.64 ns
+average time = 192.71 ns
+average time = 125.67 ns
+average time = 1492.38 ns
+average time = 367.21 ns
+BEST MOVE SEARCH (depth = 5)
+average time = 2286.1 microseconds
+average time = 1111.5 microseconds
+average time = 47 microseconds
+average time = 3710.5 microseconds
+average time = 643.7 microseconds

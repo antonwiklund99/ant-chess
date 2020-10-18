@@ -31,16 +31,23 @@ Position::Position(string fen) {
       bQueensideCastling = true;
   }
 
-  // TODO EN PASSANT
-
   halfMoveClock = std::stoi(args[4]);
   fullMoveNumber = std::stoi(args[5]);
 }
 
-Info *Position::getInfo() {
+Bitboard Position::getPossibleEnPassants() const {
+  if (states.size() > 0) {
+    return states.top()->getEnPassants();
+  } else {
+    return 0ULL;
+  }
+}
+
+Info *Position::getInfo(Bitboard enPassants) {
   return new Info((wKingsideCastling) + (wQueensideCastling << 1) +
-                  (bKingsideCastling << 2) + (bQueensideCastling << 3) +
-                  (halfMoveClock << 4));
+                      (bKingsideCastling << 2) + (bQueensideCastling << 3) +
+                      (halfMoveClock << 4),
+                  enPassants);
 }
 
 bool Position::makeMove(const Move &m) {
@@ -51,7 +58,8 @@ bool Position::makeMove(const Move &m) {
     board.unsafeMakeMove(m);
     return false;
   } else {
-    states.push(getInfo());
+    states.push(getInfo((m.getFlags() == DOUBLE_PAWN_PUSH_FLAG ? 1ULL : 0)
+                        << (m.getTo() + (turn == cWhite ? -8 : 8))));
     if (turn == cBlack) {
       fullMoveNumber++;
       if (bKingsideCastling || bKingsideCastling) {
@@ -124,6 +132,7 @@ void addFromBitboard(int from, Bitboard moves, const Position &pos,
 void generateMoves(const Position &p, vector<Move> &moveVec) {
   generateMoves(p, moveVec, p.turn);
 }
+
 // Pseudo-legal moves
 void generateMoves(const Position &pos, vector<Move> &moveVec, Color turn) {
   Bitboard own, opponent, pawns, knights, king, rooks, bishops, queen,
@@ -174,16 +183,36 @@ void generateMoves(const Position &pos, vector<Move> &moveVec, Color turn) {
                                pos.board.pieceOnSq(idx), cBlack));
       } while (pawnWestAttacks &= pawnWestAttacks - 1);
 
+    // En-passant
+    Bitboard p = pos.getPossibleEnPassants();
+    if (p) {
+      pawnEastAttacks = wPawnEastAttack(pawns, p);
+      pawnWestAttacks = wPawnWestAttack(pawns, p);
+      if (pawnEastAttacks)
+        do {
+          int idx = bitScanForward(pawnEastAttacks);
+          moveVec.push_back(Move(idx - 9, idx, EP_CAPTURE_FLAG, nPawn, turn,
+                                 pos.board.pieceOnSq(idx - 8), cBlack));
+        } while (pawnEastAttacks &= pawnEastAttacks - 1);
+
+      if (pawnWestAttacks)
+        do {
+          int idx = bitScanForward(pawnWestAttacks);
+          moveVec.push_back(Move(idx - 7, idx, EP_CAPTURE_FLAG, nPawn, turn,
+                                 pos.board.pieceOnSq(idx - 8), cBlack));
+        } while (pawnWestAttacks &= pawnWestAttacks - 1);
+    }
+
     // Castling
     if (pos.wKingsideCastling &&
         !(pos.board.getOccupied() & wKingsideSquares) &&
-        !pos.board.isAttacked(wKingsideSquares, cBlack)) {
+        !pos.board.isAttacked(king | wKingsideSquares, cBlack)) {
       moveVec.push_back(
           Move(4, 6, KING_CASTLE_FLAG, nKing, cWhite, nEmpty, cBlack));
     }
     if (pos.wQueensideCastling &&
         !(pos.board.getOccupied() & wQueensideSquares) &&
-        !pos.board.isAttacked(wQueensidePassing, cBlack)) {
+        !pos.board.isAttacked(king | wQueensidePassing, cBlack)) {
       moveVec.push_back(
           Move(4, 2, QUEEN_CASTLE_FLAG, nKing, cWhite, nEmpty, cBlack));
     }
@@ -232,21 +261,40 @@ void generateMoves(const Position &pos, vector<Move> &moveVec, Color turn) {
                                pos.board.pieceOnSq(idx), cWhite));
       } while (pawnWestAttacks &= pawnWestAttacks - 1);
 
+    // En-passant
+    Bitboard p = pos.getPossibleEnPassants();
+    if (p) {
+      pawnEastAttacks = bPawnEastAttack(pawns, p);
+      pawnWestAttacks = bPawnWestAttack(pawns, p);
+      if (pawnEastAttacks)
+        do {
+          int idx = bitScanForward(pawnEastAttacks);
+          moveVec.push_back(Move(idx + 7, idx, EP_CAPTURE_FLAG, nPawn, turn,
+                                 pos.board.pieceOnSq(idx + 8), cWhite));
+        } while (pawnEastAttacks &= pawnEastAttacks - 1);
+
+      if (pawnWestAttacks)
+        do {
+          int idx = bitScanForward(pawnWestAttacks);
+          moveVec.push_back(Move(idx + 9, idx, EP_CAPTURE_FLAG, nPawn, turn,
+                                 pos.board.pieceOnSq(idx + 8), cWhite));
+        } while (pawnWestAttacks &= pawnWestAttacks - 1);
+    }
+
     // Castling
     if (pos.bKingsideCastling &&
         !(pos.board.getOccupied() & bKingsideSquares) &&
-        !pos.board.isAttacked(bKingsideSquares, cWhite)) {
+        !pos.board.isAttacked(king | bKingsideSquares, cWhite)) {
       moveVec.push_back(
           Move(60, 62, KING_CASTLE_FLAG, nKing, cBlack, nEmpty, cWhite));
     }
     if (pos.bQueensideCastling &&
         !(pos.board.getOccupied() & bQueensideSquares) &&
-        !pos.board.isAttacked(bQueensidePassing, cWhite)) {
+        !pos.board.isAttacked(king | bQueensidePassing, cWhite)) {
       moveVec.push_back(
           Move(60, 58, QUEEN_CASTLE_FLAG, nKing, cBlack, nEmpty, cWhite));
     }
   }
-  // TODO: Add en-passant https://en.wikipedia.org/wiki/En_passant
 
   // Knight
   if (knights) {
@@ -315,11 +363,9 @@ vector<Move> legalMoves(Position &p) {
 
 Bitboard perft(int depth, Position &pos) {
   // https://www.chessprogramming.net/perfect-perft/
-  // GER inte rätt för depth > 3 MEN det beror antaglingen på att castling och
-  // en-passant inte är implementerat
   if (depth == 0)
     return 1;
-  int nodes = 0;
+  Bitboard nodes = 0ULL;
   vector<Move> moves;
   generateMoves(pos, moves);
 

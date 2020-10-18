@@ -24,37 +24,37 @@ int captures = 0;
 
 // DET HÄR BORDE LIGGA I EN TEST SUITE
 
-Bitboard expected[7] = {
-    1, 20, 400, 8902, 197281, 4865609,
-};
+Bitboard expected[7] = {1, 20, 400, 8902, 197281, 4865609, 119060324};
 
 int main(int argc, char *argv[]) {
+  std::ofstream out("benchmarks.txt");
+
   cout << "Setting up bitboards and magic...";
   cout.flush();
   Magic::initMagic();
   Bitboards::initEasyBitboards();
+
   cout << "done\nStarting perft verification..." << endl;
-  for (int i = 0; i < 6; i++) {
+  out << "PERFT:" << endl;
+  for (int i = 0; i < 7; i++) {
     captures = 0;
     cout << "Depth " << i << ": ";
     cout.flush();
+    auto start = high_resolution_clock::now();
     Bitboard d = perft(i, startPos);
+    auto stop = high_resolution_clock::now();
     if (d == expected[i]) {
       cout << "ok"
-           << " captures = " << captures << endl;
+           << " captures = " << captures
+           << " time = " << duration_cast<nanoseconds>(stop - start).count()
+           << " ns" << endl;
+      out << i << ": " << duration_cast<nanoseconds>(stop - start).count()
+          << " ns" << endl;
     } else {
       cout << "failed, expected " << expected[i] << " got " << d
            << " captures=" << captures << endl;
     }
   }
-
-  std::ofstream out("benchmarks.txt");
-  cout << "Setting up magic...";
-  std::flush(cout);
-  Magic::initMagic();
-  cout << "done\nSetting up bitboards..";
-  Bitboards::initEasyBitboards();
-  cout << "done" << endl;
 
   out << "GENERATE PSEUDO-LEGAL MOVES" << endl;
   std::vector<Move> m;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     out << "average time = " << sum / 100 << " ns" << endl;
   }
 
-  int depth = (argc > 1) ? std::stoi(argv[1]) : 4;
+  int depth = (argc > 1) ? std::stoi(argv[1]) : 5;
   out << "BEST MOVE SEARCH (depth = " << depth << ")" << endl;
   for (auto pos : positions) {
     float sum = 0;

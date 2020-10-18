@@ -9,12 +9,13 @@
 
 class Info {
 public:
-  Info(unsigned int x) : encodedInfo(x) {}
+  Info(unsigned int x, Bitboard ep) : encodedInfo(x), ep(ep) {}
   bool getWKingCastling() { return encodedInfo & 1; };
   bool getWQueenCastling() { return encodedInfo & 2; };
   bool getBKingCastling() { return encodedInfo & 4; };
   bool getBQueenCastling() { return encodedInfo & 8; };
   unsigned int getHalfMoveClock() { return encodedInfo >> 4; };
+  Bitboard getEnPassants() { return ep; };
 
 private:
   // bit 1 - wKingsidecastling
@@ -23,6 +24,7 @@ private:
   // bit 4 - bQueensidecastling
   // bit 5-32 - halfmoveclock (max 50 so will only ever use 6 bits)
   unsigned int encodedInfo;
+  Bitboard ep;
 };
 
 class Position {
@@ -44,7 +46,8 @@ public:
 
   bool makeMove(const Move &);
   void unmakeMove(const Move &);
-  Info *getInfo();
+  Info *getInfo(Bitboard);
+  Bitboard getPossibleEnPassants() const;
 };
 
 void generateMoves(const Position &, std::vector<Move> &, Color);

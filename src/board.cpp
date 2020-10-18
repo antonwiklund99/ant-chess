@@ -149,6 +149,10 @@ void Board::unsafeMakeMove(const Move &m) {
     fromToBB <<= 1;
     pieceBitboards[nRook] ^= fromToBB;
     pieceBitboards[m.color] ^= fromToBB;
+  } else if (m.isEP()) {
+    toBB = m.color == cWhite ? (toBB >> 8) : (toBB << 8);
+    pieceBitboards[m.cPiece] ^= toBB;
+    pieceBitboards[m.cColor] ^= toBB;
   }
 }
 

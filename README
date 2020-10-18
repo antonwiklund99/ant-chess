@@ -4,5 +4,4 @@ TODO:
   - improve ordering heuristics during search
   - imporove positon evaluation heuristics
   - multi-threaded
-* en-passant ("position startpos moves d2d4 e7e6 g1f3 d8f6 c1g5 f6f5 e2e3 g8f6 f1d3 f6e4 b1d2 f8b4 g5f4 f5d5 c2c4 d5f5 a2a3 b4a5 e1g1 a5d2 d3e4 f5e4 f3d2 e4d3 a3a4 e8e7 a1a3 d3f5 f4c7 b8a6 e3e4 f5g6 c7g3 g6g5 f2f4 g5a5 d2b3 a5b4 f4f5 f7f6 d1g4 h8g8 e4e5 b4c4 e5f6 e7f7 g4h5 f7f6 g3h4 g7g5 f5g6")
 * make a max-heap class for moves instead of std::vector (no need to sort etc.) (worth?)

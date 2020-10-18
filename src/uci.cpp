@@ -52,10 +52,16 @@ void position(const vector<string> &args) {
     vector<Move> m;
 
     while (movesStart < args.size()) {
+      // std::cout << "POSTION\n" << pos->board << std::endl;
       generateMoves(*pos, m);
+      std::cout << "MOVES:" << std::endl;
+      // for (auto x: m) {
+      //	std::cout << x.notation() << std::endl;
+      //}
       int i = indexOf(m, args[movesStart]);
       if (i == -1) {
-        myfile << "move: " << args[movesStart] << " is not valid?" << std::endl;
+        std::cout << "move: " << args[movesStart] << " is not valid?"
+                  << std::endl;
         throw new std::invalid_argument("move : " + args[movesStart] +
                                         " is not valid");
       } else
@@ -141,15 +147,7 @@ void run() {
       cout << "readyok" << endl;
     } else if (splitted[0] == "position") {
       position(splitted);
-      // vector<Move> m;
-      // generateMoves(*pos, m);
-      // for (auto i: m) cout << i.notation() << endl;
-      // position fen rn2k2r/pp2p2p/2p1bp2/1q3nbP/P7/3p2P1/3P1P2/R3KBNR w KQkq -
-      // 1 18 ger inte rätt board
-      // cout << "kingside black=" << pos->bKingsideCastling << " queenside
-      // black=" << 	pos->bQueensideCastling << "\nkingside white=" <<
-      //pos->wKingsideCastling << 	" queenside white=" << pos->wQueensideCastling
-      //<< endl;
+      cout << pos->board << std::endl;
     } else if (splitted[0] == "go") {
       go(splitted);
     } else if (splitted[0] == "stop") {
@@ -157,10 +155,10 @@ void run() {
     } else if (splitted[0] == "setoption") {
       std::cout << "info str Engine has no options" << std::endl;
     } else if (splitted[0] == "perft") {
-      int nodes = 0;
+      uint64_t nodes = 0;
       for (auto m : legalMoves(*pos)) {
         pos->makeMove(m);
-        int i = perft(std::stoi(splitted[1]) - 1, *pos);
+        uint64_t i = perft(std::stoi(splitted[1]) - 1, *pos);
         nodes += i;
         cout << m.notation() << ": " << i << endl;
         pos->unmakeMove(m);

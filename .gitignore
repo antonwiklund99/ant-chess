@@ -3,4 +3,6 @@ TAGS
 compile_commands.json
 *.o
 main
+benchmarks
+.vscode
 log.txt

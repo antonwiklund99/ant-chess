@@ -56,6 +56,7 @@ public:
   bool isQueenCastle() const {
     return (encodedMove >> 12) == QUEEN_CASTLE_FLAG;
   }
+  bool isEP() const { return (encodedMove >> 12) == EP_CAPTURE_FLAG; }
 
   unsigned int getButterflyIndex() const { return encodedMove & 0x0fff; }
   void operator=(Move a) {
