@@ -52,20 +52,15 @@ void position(const vector<string> &args) {
     vector<Move> m;
 
     while (movesStart < args.size()) {
-      // std::cout << "POSTION\n" << pos->board << std::endl;
       generateMoves(*pos, m);
-      std::cout << "MOVES:" << std::endl;
-      // for (auto x: m) {
-      //	std::cout << x.notation() << std::endl;
-      //}
       int i = indexOf(m, args[movesStart]);
       if (i == -1) {
         std::cout << "move: " << args[movesStart] << " is not valid?"
                   << std::endl;
         throw new std::invalid_argument("move : " + args[movesStart] +
                                         " is not valid");
-      } else
-        pos->makeMove(m[i]);
+      }
+      pos->makeMove(m[i]);
       movesStart++;
     }
   }
@@ -147,7 +142,6 @@ void run() {
       cout << "readyok" << endl;
     } else if (splitted[0] == "position") {
       position(splitted);
-      cout << pos->board << std::endl;
     } else if (splitted[0] == "go") {
       go(splitted);
     } else if (splitted[0] == "stop") {
