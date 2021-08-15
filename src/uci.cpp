@@ -23,7 +23,7 @@ int indexOf(vector<Move> &v, const string &s) {
 
 namespace UCI {
 namespace {
-string info = "id name   Achess\nid author Anton Wiklund\n";
+string info = "id name   Ant Chess\nid author Anton Wiklund\n";
 Position *pos;
 bool debug = false;
 std::ofstream myfile;
