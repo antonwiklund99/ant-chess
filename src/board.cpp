@@ -79,14 +79,14 @@ Board::Board(string s) {
 }
 
 void Board::reset() {
-  pieceBitboards[0] = 0x000000000000ffff;
-  pieceBitboards[1] = 0xffff000000000000;
-  pieceBitboards[2] = 0x00ff00000000ff00;
-  pieceBitboards[3] = 0x4200000000000042;
-  pieceBitboards[4] = 0x2400000000000024;
-  pieceBitboards[5] = 0x8100000000000081;
-  pieceBitboards[6] = 0x0800000000000008;
-  pieceBitboards[7] = 0x1000000000000010;
+  pieceBitboards[nWhite]  = 0x000000000000ffff;
+  pieceBitboards[nBlack]  = 0xffff000000000000;
+  pieceBitboards[nPawn]   = 0x00ff00000000ff00;
+  pieceBitboards[nKnight] = 0x4200000000000042;
+  pieceBitboards[nBishop] = 0x2400000000000024;
+  pieceBitboards[nRook]   = 0x8100000000000081;
+  pieceBitboards[nQueen]  = 0x0800000000000008;
+  pieceBitboards[nKing]   = 0x1000000000000010;
 }
 
 bool Board::isAttacked(Bitboard target, Color attackingColor) const {
@@ -171,6 +171,19 @@ Piece Board::pieceOnSq(int n) const {
   if (bb & pieceBitboards[nKing])
     return nKing;
   return nEmpty;
+}
+
+Bitboard Board::getHash(Bitboard* hashNums) const {
+  Bitboard hash = 0;
+  for (int i = 0; i < 64; i++) {
+    Piece p = pieceOnSq(i);
+    if (p != nEmpty) {
+      int c = (1ULL << i) & pieceBitboards[nBlack] ? 6 : 0;
+      int index = i*12 + p - 2 + c;
+      hash ^= hashNums[index];
+    }
+  }
+  return hash;
 }
 
 Bitboard wSinglePush(Bitboard pawns, Bitboard emptySqs) {

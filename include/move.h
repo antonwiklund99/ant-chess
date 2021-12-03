@@ -73,7 +73,7 @@ public:
     return (encodedMove & 0xffff) != (a.encodedMove & 0xffff);
   }
 
-  std::string notation();
+  std::string notation() const;
 
 private:
   unsigned int encodedMove;

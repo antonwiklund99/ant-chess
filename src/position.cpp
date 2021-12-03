@@ -2,11 +2,23 @@
 #include "bitboards.h"
 #include "board.h"
 #include "utils.h"
+#include "enums.h"
 #include <algorithm>
 #include <vector>
+#include <stdio.h>
+#include <stdlib.h>
 using std::find;
 using std::string;
 using std::vector;
+
+// Init random numbers for hashing
+uint64_t hashNums[781];
+void initRandomHashes() {
+  srand(1337);
+  for (int i = 0; i < 781; i++) {
+    hashNums[i] = rand();
+  }
+}
 
 Position::Position(string fen) {
   vector<string> args;
@@ -33,6 +45,31 @@ Position::Position(string fen) {
 
   halfMoveClock = std::stoi(args[4]);
   fullMoveNumber = std::stoi(args[5]);
+
+  calcHash();
+}
+
+void Position::calcHash() {
+  hash = board.getHash(hashNums);
+  if (turn == cBlack)     hash ^= hashNums[768];
+  if (wKingsideCastling)  hash ^= hashNums[769];
+  if (wQueensideCastling) hash ^= hashNums[770];
+  if (bKingsideCastling)  hash ^= hashNums[771];
+  if (bQueensideCastling) hash ^= hashNums[772];
+  /*
+  Skippar en-passant för hash mer huvudvärk än värt
+  Bitboard p = getPossibleEnPassants();
+  if (p) {
+    if (p & AFile) hash ^= hashNums[773];
+    if (p & BFile) hash ^= hashNums[774];
+    if (p & CFile) hash ^= hashNums[775];
+    if (p & DFile) hash ^= hashNums[776];
+    if (p & EFile) hash ^= hashNums[777];
+    if (p & FFile) hash ^= hashNums[778];
+    if (p & GFile) hash ^= hashNums[779];
+    if (p & HFile) hash ^= hashNums[780];
+  }
+  */
 }
 
 Bitboard Position::getPossibleEnPassants() const {
@@ -58,41 +95,62 @@ bool Position::makeMove(const Move &m) {
     board.unsafeMakeMove(m);
     return false;
   } else {
+    int from = m.getFrom(), to = m.getTo();
     states.push(getInfo((m.getFlags() == DOUBLE_PAWN_PUSH_FLAG ? 1ULL : 0)
-                        << (m.getTo() + (turn == cWhite ? -8 : 8))));
+                        << (to + (turn == cWhite ? -8 : 8))));
+
+    // Update positions in hash for pieces
+    hash ^= hashNums[from*12 + m.piece - 2 + (turn == cBlack ? 6 : 0)];
+    hash ^= hashNums[to*12 + m.piece - 2 + (turn == cBlack ? 6 : 0)];
+    if (m.isCapture()) {
+      hash ^= hashNums[to*12 + m.cPiece - 2 + (turn == cWhite ? 6 : 0)];
+    }
+
     if (turn == cBlack) {
       fullMoveNumber++;
       if (m.isKingCastle() || m.isQueenCastle() || m.piece == nKing) {
         bKingsideCastling = false;
         bQueensideCastling = false;
+        hash ^= hashNums[771] ^ hashNums[772];
       } else if (bKingsideCastling && m.piece == nRook && m.getFrom() == 63) {
         bKingsideCastling = false;
+        hash ^= hashNums[771];
       } else if (bQueensideCastling && m.piece == nRook && m.getFrom() == 56) {
         bQueensideCastling = false;
+        hash ^= hashNums[772];
       } else if (wKingsideCastling && m.cPiece == nRook && m.getTo() == 7) {
         wKingsideCastling = false;
+        hash ^= hashNums[769];
       } else if (wQueensideCastling && m.cPiece == nRook && m.getTo() == 0) {
         wQueensideCastling = false;
+        hash ^= hashNums[770];
       }
     } else {
       if (m.isKingCastle() || m.isQueenCastle() || m.piece == nKing) {
         wKingsideCastling = false;
         wQueensideCastling = false;
+        hash ^= hashNums[769] ^ hashNums[770];
       } else if (wKingsideCastling && m.piece == nRook && m.getFrom() == 7) {
         wKingsideCastling = false;
+        hash ^= hashNums[769];
       } else if (wQueensideCastling && m.piece == nRook && m.getFrom() == 0) {
         wQueensideCastling = false;
+        hash ^= hashNums[770];
       } else if (bKingsideCastling && m.cPiece == nRook && m.getTo() == 63) {
         bKingsideCastling = false;
+        hash ^= hashNums[771];
       } else if (bQueensideCastling && m.cPiece == nRook && m.getTo() == 56) {
         bQueensideCastling = false;
+        hash ^= hashNums[772];
       }
     }
     if (m.isCapture() || m.piece == nPawn)
       halfMoveClock = 0;
     else
       halfMoveClock++;
+
     turn = (turn == cWhite ? cBlack : cWhite);
+    hash ^= hashNums[768]; // update turn in hash
     return true;
   }
 }

@@ -85,6 +85,7 @@ public:
   bool isAttacked(Bitboard, Color) const;
   void unsafeMakeMove(const Move &);
   Piece pieceOnSq(int) const;
+  Bitboard getHash(Bitboard*) const;
 
 private:
   // 0 - 1 = each colors bitboard

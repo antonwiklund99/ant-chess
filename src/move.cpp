@@ -11,7 +11,7 @@ string indexToCordinate(unsigned int i) {
   return ret;
 }
 
-string Move::notation() {
+string Move::notation() const {
   /*
   u_int flags = getFlags();
           lichess wants castling as king movement

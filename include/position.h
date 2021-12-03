@@ -38,18 +38,22 @@ public:
   bool bQueensideCastling;
   unsigned int halfMoveClock;
   unsigned int fullMoveNumber;
+  uint64_t hash;
   Position(std::string);
   Position()
       : turn(cWhite), wKingsideCastling(true), wQueensideCastling(true),
         bKingsideCastling(true), bQueensideCastling(true), halfMoveClock(0),
-        fullMoveNumber(1) {}
+        fullMoveNumber(1) { calcHash(); }
 
   bool makeMove(const Move &);
   void unmakeMove(const Move &);
   Info *getInfo(Bitboard);
   Bitboard getPossibleEnPassants() const;
+private:
+  void calcHash();
 };
 
+void initRandomHashes();
 void generateMoves(const Position &, std::vector<Move> &, Color);
 void generateMoves(const Position &, std::vector<Move> &);
 std::vector<Move> legalMoves(Position &);

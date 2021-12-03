@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
   cout.flush();
   Magic::initMagic();
   Bitboards::initEasyBitboards();
+  initRandomHashes();
 
   cout << "done\nStarting perft verification..." << endl;
   out << "PERFT:" << endl;
