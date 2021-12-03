@@ -3,6 +3,7 @@
 #include "minimax.h"
 #include "position.h"
 #include "utils.h"
+#include "book.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -12,14 +13,6 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
-
-int indexOf(vector<Move> &v, const string &s) {
-  for (size_t i = 0; i < v.size(); i++) {
-    if (v[i].notation() == s)
-      return i;
-  }
-  return -1;
-}
 
 namespace UCI {
   namespace {
@@ -60,7 +53,6 @@ namespace UCI {
             throw new std::invalid_argument("move : " + args[movesStart] +
                                             " is not valid");
           }
-          pos->makeMove(m[i]);
           movesStart++;
           pos->makeMove(m[i]);
           if (debug) {
@@ -96,9 +88,17 @@ namespace UCI {
       int depth = 5, wtime = -1, btime = -1, winc = -1, binc = -1, movestogo = -1,
           nodes = -1, mate = -1, movetime = -1;
       bool ponder = false, infinite = false;
+
+      if (Book::contains(pos->hash)) {
+        Move& move = Book::get(pos->hash);
+        cout << "bestmove " << move.notation() << endl;
+        return;
+      }
+
       vector<Move> m = legalMoves(*pos);
       vector<Move> searchMoves;
       for (size_t i = 1; i < args.size(); i++) {
+        myfile << args[i] << endl;
         if (args[i] == "searchmoves") {
           int idx;
           while (++i < args.size() && (idx = indexOf(m, args[i])) != -1)
@@ -139,6 +139,8 @@ namespace UCI {
     myfile.open("log.txt", std::ios_base::app);
     Magic::initMagic();
     Bitboards::initEasyBitboards();
+    initRandomHashes();
+    Book::initBook(); // this relies on hashes already being initialized :/
     debug = false;
     string input;
     vector<string> splitted;
@@ -151,7 +153,9 @@ namespace UCI {
         myfile.close();
         return;
       } else if (input == "uci") {
-        cout << info << "uciok" << endl;
+        // TODO: implement
+        cout << info
+             << "uciok" << endl;
       } else if (splitted[0] == "debug") {
         if (splitted[1] == "on") {
           cout << "Turning debug mode on" << endl;
@@ -170,7 +174,7 @@ namespace UCI {
       } else if (splitted[0] == "stop") {
         // stop.store(true);
       } else if (splitted[0] == "setoption") {
-        std::cout << "info str Engine has no options" << std::endl;
+        // TODO: implement
       } else if (splitted[0] == "perft") {
         uint64_t nodes = 0;
         for (auto m : legalMoves(*pos)) {

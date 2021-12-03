@@ -2,6 +2,7 @@
 #define UTIL_GUARD
 
 #include "enums.h"
+#include "move.h"
 #include <string>
 #include <vector>
 
@@ -32,4 +33,5 @@ Bitboard soSoWe(Bitboard b);
 void printBitboardRows(Bitboard);
 std::string bitboardToString(Bitboard);
 void split(std::string, std::vector<std::string> &, char);
+int indexOf(std::vector<Move> &v, const std::string &s);
 #endif

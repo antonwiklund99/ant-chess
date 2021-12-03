@@ -1,5 +1,5 @@
-SOURCES=src/utils.cpp src/uci.cpp src/main.cpp src/bitboards.cpp src/board.cpp src/position.cpp src/move.cpp src/minimax.cpp src/benchmarks.cpp
-HEADERS=include/utils.h include/bitboards.h include/board.h include/position.h include/move.h include/enums.h include/minimax.h include/uci.h
+SOURCES=src/utils.cpp src/main.cpp src/bitboards.cpp src/board.cpp src/book.cpp src/position.cpp src/move.cpp src/minimax.cpp src/benchmarks.cpp src/uci.cpp
+HEADERS=include/utils.h include/bitboards.h include/book.h include/board.h include/position.h include/move.h include/enums.h include/minimax.h include/uci.h
 OBJECTS=$(patsubst src/%.cpp, src/%.o, $(SOURCES))
 BENCH_OBJECTS=$(filter-out src/main.o, $(OBJECTS))
 MAIN_OBJECTS=$(filter-out src/benchmarks.o, $(OBJECTS))

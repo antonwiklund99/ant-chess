@@ -39,7 +39,7 @@ public:
   unsigned int halfMoveClock;
   unsigned int fullMoveNumber;
   uint64_t hash;
-  Position(std::string);
+  Position(const std::string&);
   Position()
       : turn(cWhite), wKingsideCastling(true), wQueensideCastling(true),
         bKingsideCastling(true), bQueensideCastling(true), halfMoveClock(0),

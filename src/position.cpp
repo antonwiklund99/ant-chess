@@ -20,7 +20,7 @@ void initRandomHashes() {
   }
 }
 
-Position::Position(string fen) {
+Position::Position(const string& fen) {
   vector<string> args;
   split(fen, args, ' ');
   if (args.size() != 6)

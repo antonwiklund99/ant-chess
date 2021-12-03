@@ -31,7 +31,6 @@ int countOnes(Bitboard b) {
   return n;
 }
 
-
 string bitboardToString(Bitboard b) {
   string s;
   for (int i = 7; i > -1; i--) {
@@ -63,6 +62,14 @@ void split(string s, vector<string> &res, char delim) {
   }
   if (!b.empty())
     res.push_back(b);
+}
+
+int indexOf(vector<Move> &v, const string &s) {
+  for (size_t i = 0; i < v.size(); i++) {
+    if (v[i].notation() == s)
+      return i;
+  }
+  return -1;
 }
 
 Bitboard northOne(Bitboard b) { return b << 8; }
