@@ -61,6 +61,18 @@ void position(const vector<string> &args) {
                                         " is not valid");
       }
       pos->makeMove(m[i]);
+      if (debug) {
+        myfile << "After " + m[i].notation() + '\n'
+           << pos->board << "turn = " << (pos->turn == cWhite ? "w" : "b")
+           << "\nhalfMoveClock = " << pos->halfMoveClock
+           << "\nfullMoveNumber = " << pos->fullMoveNumber
+           << "\nwKingsideCastling = " << pos->wKingsideCastling
+           << "\nwQueensideCastling; = " << pos->wQueensideCastling
+           << "\nwKingsideCastling; = " << pos->bKingsideCastling
+           << "\nwQueensideCastling; = " << pos->bQueensideCastling
+           << bitboardToString(pos->board.getWhites()) << '\n'
+           << bitboardToString(pos->board.getWhiteRooks()) << endl;
+      }
       movesStart++;
     }
   }
@@ -69,7 +81,13 @@ void position(const vector<string> &args) {
     myfile << "After moves\n"
            << pos->board << "turn = " << (pos->turn == cWhite ? "w" : "b")
            << "\nhalfMoveClock = " << pos->halfMoveClock
-           << "\nfullMoveNumber = " << pos->fullMoveNumber << endl;
+           << "\nfullMoveNumber = " << pos->fullMoveNumber
+           << "\nwKingsideCastling = " << pos->wKingsideCastling
+           << "\nwQueensideCastling = " << pos->wQueensideCastling
+           << "\nwKingsideCastling = " << pos->bKingsideCastling
+           << "\nwQueensideCastling = " << pos->bQueensideCastling << '\n'
+           << bitboardToString(pos->board.getWhites()) << '\n'
+           << bitboardToString(pos->board.getWhiteRooks()) << endl;
   }
 }
 
@@ -120,7 +138,7 @@ void run() {
   myfile.open("log.txt", std::ios_base::app);
   Magic::initMagic();
   Bitboards::initEasyBitboards();
-  debug = true;
+  debug = false;
   string input;
   vector<string> splitted;
   while (true) {
@@ -134,10 +152,14 @@ void run() {
     } else if (input == "uci") {
       cout << info << "uciok" << endl;
     } else if (splitted[0] == "debug") {
-      if (splitted[1] == "on")
+      if (splitted[1] == "on") {
+        cout << "Turning debug mode on" << endl;
         debug = true;
-      else if (splitted[1] == "off")
+      }
+      else if (splitted[1] == "off") {
+        cout << "Turning debug mode off" << endl;
         debug = false;
+      }
     } else if (input == "isready") {
       cout << "readyok" << endl;
     } else if (splitted[0] == "position") {
@@ -158,6 +180,8 @@ void run() {
         pos->unmakeMove(m);
       }
       cout << "Nodes: " << nodes << endl;
+    } else {
+      cout << "Unknown command: " << splitted[0] << endl;
     }
   }
 }

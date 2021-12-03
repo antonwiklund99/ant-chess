@@ -30,5 +30,6 @@ Bitboard soWeWe(Bitboard b);
 Bitboard soSoWe(Bitboard b);
 
 void printBitboardRows(Bitboard);
+std::string bitboardToString(Bitboard);
 void split(std::string, std::vector<std::string> &, char);
 #endif

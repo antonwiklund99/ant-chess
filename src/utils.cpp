@@ -31,17 +31,23 @@ int countOnes(Bitboard b) {
   return n;
 }
 
-// Prints bitboard "most important byte to least important byte", same way as a
-// checkboard from whites pov
-void printBitboardRows(Bitboard b) {
+
+string bitboardToString(Bitboard b) {
+  string s;
   for (int i = 7; i > -1; i--) {
     int row = (b >> 8 * i) & 0xffULL;
     for (int j = 0; j < 8; j++) {
-      std::cout << (((1 << j) & row) ? "1" : "0");
+      s += (((1 << j) & row) ? "1" : "0");
     }
-    std::cout << std::endl;
+    s += '\n';
   }
-  std::cout << std::endl;
+  return s;
+}
+
+// Prints bitboard "most important byte to least important byte", same way as a
+// checkboard from whites pov
+void printBitboardRows(Bitboard b) {
+  std::cout << bitboardToString(b) << std::endl;
 }
 
 void split(string s, vector<string> &res, char delim) {

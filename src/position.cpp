@@ -62,28 +62,30 @@ bool Position::makeMove(const Move &m) {
                         << (m.getTo() + (turn == cWhite ? -8 : 8))));
     if (turn == cBlack) {
       fullMoveNumber++;
-      if (bKingsideCastling || bKingsideCastling) {
-        if (m.isKingCastle() || m.isQueenCastle() || m.piece == nKing)
-          bKingsideCastling = bQueensideCastling = false;
-        else if (m.piece == nRook) {
-          // kanske on'digt med första kollen (?)
-          if (bKingsideCastling && m.getFrom() == 63)
-            bKingsideCastling = false;
-          else if (bQueensideCastling && m.getFrom() == 56)
-            bQueensideCastling = false;
-        }
+      if (m.isKingCastle() || m.isQueenCastle() || m.piece == nKing) {
+        bKingsideCastling = false;
+        bQueensideCastling = false;
+      } else if (bKingsideCastling && m.piece == nRook && m.getFrom() == 63) {
+        bKingsideCastling = false;
+      } else if (bQueensideCastling && m.piece == nRook && m.getFrom() == 56) {
+        bQueensideCastling = false;
+      } else if (wKingsideCastling && m.cPiece == nRook && m.getTo() == 7) {
+        wKingsideCastling = false;
+      } else if (wQueensideCastling && m.cPiece == nRook && m.getTo() == 0) {
+        wQueensideCastling = false;
       }
     } else {
-      if (wKingsideCastling || wKingsideCastling) {
-        if (m.isKingCastle() || m.isQueenCastle() || m.piece == nKing) {
-          wKingsideCastling = wQueensideCastling = false;
-        } else if (m.piece == nRook) {
-          // kanske onödigt med första kollen (?)
-          if (wKingsideCastling && m.getFrom() == 7)
-            wKingsideCastling = false;
-          else if (wQueensideCastling && m.getFrom() == 0)
-            wQueensideCastling = false;
-        }
+      if (m.isKingCastle() || m.isQueenCastle() || m.piece == nKing) {
+        wKingsideCastling = false;
+        wQueensideCastling = false;
+      } else if (wKingsideCastling && m.piece == nRook && m.getFrom() == 7) {
+        wKingsideCastling = false;
+      } else if (wQueensideCastling && m.piece == nRook && m.getFrom() == 0) {
+        wQueensideCastling = false;
+      } else if (bKingsideCastling && m.cPiece == nRook && m.getTo() == 63) {
+        bKingsideCastling = false;
+      } else if (bQueensideCastling && m.cPiece == nRook && m.getTo() == 56) {
+        bQueensideCastling = false;
       }
     }
     if (m.isCapture() || m.piece == nPawn)
