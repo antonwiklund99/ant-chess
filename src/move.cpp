@@ -12,16 +12,18 @@ string indexToCordinate(unsigned int i) {
 }
 
 string Move::notation() const {
-  /*
-  u_int flags = getFlags();
-          lichess wants castling as king movement
-          if (flags == KING_CASTLE_FLAG) return "0-0";
-          if (flags == QUEEN_CASTLE_FLAG) return "0-0-0";
-  */
   string ret;
-  // if (piece != nPawn)
   ret = indexToCordinate(getFrom());
-  // ret += ((isCapture()) ? 'x' : '-');
   ret += indexToCordinate(getTo());
+  u_int flags = getFlags();
+  if (flags == QUEEN_PROMOTION_FLAG || flags == QUEEN_PROMOTION_CAPTURE_FLAG) {
+    ret += 'q';
+  } else if (flags == ROOK_PROMOTION_FLAG || flags == ROOK_PROMOTION_CAPTURE_FLAG) {
+    ret += 'r';
+  } else if (flags == BISHOP_PROMOTION_FLAG || flags == BISHOP_PROMOTION_CAPTURE_FLAG) {
+    ret += 'b';
+  } else if (flags == KNIGHT_PROMOTION_FLAG || flags == KNIGHT_PROMOTION_CAPTURE_FLAG) {
+    ret += 'n';
+  }
   return ret;
 }

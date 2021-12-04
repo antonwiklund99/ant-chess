@@ -62,10 +62,8 @@ namespace UCI {
               << "\nfullMoveNumber = " << pos->fullMoveNumber
               << "\nwKingsideCastling = " << pos->wKingsideCastling
               << "\nwQueensideCastling; = " << pos->wQueensideCastling
-              << "\nwKingsideCastling; = " << pos->bKingsideCastling
-              << "\nwQueensideCastling; = " << pos->bQueensideCastling
-              << bitboardToString(pos->board.getWhites()) << '\n'
-              << bitboardToString(pos->board.getWhiteRooks()) << endl;
+              << "\nbKingsideCastling; = " << pos->bKingsideCastling
+              << "\nbQueensideCastling; = " << pos->bQueensideCastling << endl;
           }
         }
       }
@@ -76,10 +74,8 @@ namespace UCI {
            << "\nfullMoveNumber = " << pos->fullMoveNumber
            << "\nwKingsideCastling = " << pos->wKingsideCastling
            << "\nwQueensideCastling; = " << pos->wQueensideCastling
-           << "\nwKingsideCastling; = " << pos->bKingsideCastling
-           << "\nwQueensideCastling; = " << pos->bQueensideCastling
-           << bitboardToString(pos->board.getWhites()) << '\n'
-           << bitboardToString(pos->board.getWhiteRooks()) << endl;
+           << "\nbKingsideCastling; = " << pos->bKingsideCastling
+           << "\nbQueensideCastling; = " << pos->bQueensideCastling << endl;
       }
       movesStart++;
     }
@@ -185,6 +181,9 @@ namespace UCI {
           pos->unmakeMove(m);
         }
         cout << "Nodes: " << nodes << endl;
+      } else if(splitted[0] == "ucinewgame") {
+        // https://rdrr.io/github/rosawojciech/bigchess/man/uci_ucinewgame.html
+        // has no impact
       } else {
         cout << "Unknown command: " << splitted[0] << endl;
       }

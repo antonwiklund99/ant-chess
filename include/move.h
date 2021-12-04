@@ -36,7 +36,7 @@ public:
 
   unsigned int getTo() const { return encodedMove & 0x3f; }
   unsigned int getFrom() const { return (encodedMove >> 6) & 0x3f; }
-  unsigned int getFlags() const { return (encodedMove >> 12) & 0xf; }
+  unsigned int getFlags() const { return encodedMove >> 12; }
 
   void setTo(unsigned int to) {
     encodedMove &= ~0x3f;
@@ -51,12 +51,30 @@ public:
     encodedMove |= (flags & 0xf) << 12;
   }
 
-  bool isCapture() const { return (encodedMove >> 12) == CAPTURE_FLAG; }
-  bool isKingCastle() const { return (encodedMove >> 12) == KING_CASTLE_FLAG; }
-  bool isQueenCastle() const {
-    return (encodedMove >> 12) == QUEEN_CASTLE_FLAG;
+  bool isCapture() const {
+    uint32_t flags = encodedMove >> 12;
+    return flags == CAPTURE_FLAG || flags == QUEEN_PROMOTION_CAPTURE_FLAG || flags == BISHOP_PROMOTION_CAPTURE_FLAG ||
+           flags == ROOK_PROMOTION_CAPTURE_FLAG || flags == KNIGHT_PROMOTION_CAPTURE_FLAG;
   }
+  bool isKingCastle() const { return (encodedMove >> 12) == KING_CASTLE_FLAG; }
+  bool isQueenCastle() const { return (encodedMove >> 12) == QUEEN_CASTLE_FLAG; }
   bool isEP() const { return (encodedMove >> 12) == EP_CAPTURE_FLAG; }
+  bool isQueenPromotion() const {
+    uint32_t flags = encodedMove >> 12;
+    return flags == QUEEN_PROMOTION_CAPTURE_FLAG || flags == QUEEN_PROMOTION_FLAG;
+  }
+  bool isKnightPromotion() const {
+    uint32_t flags = encodedMove >> 12;
+    return flags == KNIGHT_PROMOTION_CAPTURE_FLAG || flags == KNIGHT_PROMOTION_FLAG;
+  }
+  bool isRookPromotion() const {
+    uint32_t flags = encodedMove >> 12;
+    return flags == ROOK_PROMOTION_CAPTURE_FLAG || flags == ROOK_PROMOTION_FLAG;
+  }
+  bool isBishopPromotion() const {
+    uint32_t flags = encodedMove >> 12;
+    return flags == BISHOP_PROMOTION_CAPTURE_FLAG || flags == BISHOP_PROMOTION_FLAG;
+  }
 
   unsigned int getButterflyIndex() const { return encodedMove & 0x0fff; }
   void operator=(Move a) {

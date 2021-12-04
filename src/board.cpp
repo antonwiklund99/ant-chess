@@ -21,10 +21,6 @@ Board::Board(string s) {
   }
   Bitboard mask = 1;
   int shiftCount = 0;
-  // måste vända på fen strängen eftersom den svarta sidan kommer först i den,
-  // men i den interna representationen är vit först, skulle bara kunnat loopa
-  // baklänges men jag använde en iterator innan och pallar ej skriva om det
-  // (TODO)
   vector<string> rows;
   split(s, rows, '/');
   for (int i = rows.size() - 1; i != -1; i--) {
@@ -90,7 +86,7 @@ void Board::reset() {
 }
 
 bool Board::isAttacked(Bitboard target, Color attackingColor) const {
-  Bitboard pawns, line, diagonal, knights;
+  Bitboard pawns, line, diagonal, knights, king;
   if (attackingColor == cWhite) {
     pawns = getWhitePawns();
     if (wPawnWestAttack(pawns, target) | wPawnEastAttack(pawns, target))
@@ -98,6 +94,7 @@ bool Board::isAttacked(Bitboard target, Color attackingColor) const {
     diagonal = getWhiteBishops() | getWhiteQueen();
     line = getWhiteRooks() | getWhiteQueen();
     knights = getWhiteKnights();
+    king = getWhiteKing();
   } else {
     pawns = getBlackPawns();
     if (bPawnWestAttack(pawns, target) | bPawnEastAttack(pawns, target))
@@ -105,6 +102,7 @@ bool Board::isAttacked(Bitboard target, Color attackingColor) const {
     diagonal = getBlackBishops() | getBlackQueen();
     line = getBlackRooks() | getBlackQueen();
     knights = getBlackKnights();
+    king = getBlackKing();
   }
 
   int sq;
@@ -112,8 +110,8 @@ bool Board::isAttacked(Bitboard target, Color attackingColor) const {
     do {
       sq = bitScanForward(target);
 
-      if (Bitboards::knight[sq] & knights)
-        return true;
+      if (Bitboards::knight[sq] & knights) return true;
+      if (Bitboards::king[sq] & king) return true;
 
       const Magic &m1 = Magic::bishopTable[sq];
       Bitboard occ = m1.mask & getOccupied();
@@ -134,8 +132,22 @@ void Board::unsafeMakeMove(const Move &m) {
   Bitboard fromBB = 1ULL << m.getFrom();
   Bitboard toBB = 1ULL << m.getTo();
   Bitboard fromToBB = fromBB ^ toBB;
-  pieceBitboards[m.piece] ^= fromToBB;
   pieceBitboards[m.color] ^= fromToBB;
+  if (m.isQueenPromotion()) {
+    pieceBitboards[m.piece] ^= fromBB;
+    pieceBitboards[nQueen] ^= toBB;
+  } else if (m.isBishopPromotion()) {
+    pieceBitboards[m.piece] ^= fromBB;
+    pieceBitboards[nBishop] ^= toBB;
+  } else if (m.isKnightPromotion()) {
+    pieceBitboards[m.piece] ^= fromBB;
+    pieceBitboards[nKnight] ^= toBB;
+  } else if (m.isRookPromotion()) {
+    pieceBitboards[m.piece] ^= fromBB;
+    pieceBitboards[nRook] ^= toBB;
+  } else {
+    pieceBitboards[m.piece] ^= fromToBB;
+  }
   if (m.isCapture()) {
     // if capture toggle captured piece's bitboards
     pieceBitboards[m.cPiece] ^= toBB;

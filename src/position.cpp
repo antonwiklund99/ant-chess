@@ -118,7 +118,8 @@ bool Position::makeMove(const Move &m) {
       } else if (bQueensideCastling && m.piece == nRook && m.getFrom() == 56) {
         bQueensideCastling = false;
         hash ^= hashNums[772];
-      } else if (wKingsideCastling && m.cPiece == nRook && m.getTo() == 7) {
+      }
+      if (wKingsideCastling && m.cPiece == nRook && m.getTo() == 7) {
         wKingsideCastling = false;
         hash ^= hashNums[769];
       } else if (wQueensideCastling && m.cPiece == nRook && m.getTo() == 0) {
@@ -136,7 +137,8 @@ bool Position::makeMove(const Move &m) {
       } else if (wQueensideCastling && m.piece == nRook && m.getFrom() == 0) {
         wQueensideCastling = false;
         hash ^= hashNums[770];
-      } else if (bKingsideCastling && m.cPiece == nRook && m.getTo() == 63) {
+      }
+      if (bKingsideCastling && m.cPiece == nRook && m.getTo() == 63) {
         bKingsideCastling = false;
         hash ^= hashNums[771];
       } else if (bQueensideCastling && m.cPiece == nRook && m.getTo() == 56) {
@@ -212,12 +214,19 @@ void generateMoves(const Position &pos, vector<Move> &moveVec, Color turn) {
     Bitboard pawnSinglePushTargets = wSinglePush(pawns, empty);
     Bitboard pawnDoublePushTargets = wDoublePush(pawnSinglePushTargets, empty);
 
-    if (pawnSinglePushTargets)
+    if (pawnSinglePushTargets) {
       do {
         int idx = bitScanForward(pawnSinglePushTargets);
-        moveVec.push_back(Move(idx - 8, idx, 0, nPawn, cWhite, nEmpty, cBlack));
+        if (idx > 55) {
+          moveVec.push_back(Move(idx - 8, idx, QUEEN_PROMOTION_FLAG, nPawn, cWhite, nEmpty, cBlack));
+          moveVec.push_back(Move(idx - 8, idx, ROOK_PROMOTION_FLAG, nPawn, cWhite, nEmpty, cBlack));
+          moveVec.push_back(Move(idx - 8, idx, KNIGHT_PROMOTION_FLAG, nPawn, cWhite, nEmpty, cBlack));
+          moveVec.push_back(Move(idx - 8, idx, BISHOP_PROMOTION_FLAG, nPawn, cWhite, nEmpty, cBlack));
+        } else {
+          moveVec.push_back(Move(idx - 8, idx, 0, nPawn, cWhite, nEmpty, cBlack));
+        }
       } while (pawnSinglePushTargets &= pawnSinglePushTargets - 1);
-
+    }
     if (pawnDoublePushTargets)
       do {
         int idx = bitScanForward(pawnDoublePushTargets);
@@ -232,15 +241,38 @@ void generateMoves(const Position &pos, vector<Move> &moveVec, Color turn) {
     if (pawnEastAttacks)
       do {
         int idx = bitScanForward(pawnEastAttacks);
-        moveVec.push_back(Move(idx - 9, idx, CAPTURE_FLAG, nPawn, turn,
+        if (idx > 55) {
+          moveVec.push_back(Move(idx - 9, idx, QUEEN_PROMOTION_CAPTURE_FLAG, nPawn, turn,
                                pos.board.pieceOnSq(idx), cBlack));
+          moveVec.push_back(Move(idx - 9, idx, ROOK_PROMOTION_CAPTURE_FLAG, nPawn, turn,
+                               pos.board.pieceOnSq(idx), cBlack));
+          moveVec.push_back(Move(idx - 9, idx, KNIGHT_PROMOTION_CAPTURE_FLAG, nPawn, turn,
+                               pos.board.pieceOnSq(idx), cBlack));
+          moveVec.push_back(Move(idx - 9, idx, BISHOP_PROMOTION_CAPTURE_FLAG, nPawn, turn,
+                               pos.board.pieceOnSq(idx), cBlack));
+        } else {
+          moveVec.push_back(Move(idx - 9, idx, CAPTURE_FLAG, nPawn, turn,
+                                        pos.board.pieceOnSq(idx), cBlack));
+        }
+
       } while (pawnEastAttacks &= pawnEastAttacks - 1);
 
     if (pawnWestAttacks)
       do {
         int idx = bitScanForward(pawnWestAttacks);
-        moveVec.push_back(Move(idx - 7, idx, CAPTURE_FLAG, nPawn, turn,
+        if (idx > 55) {
+          moveVec.push_back(Move(idx - 7, idx, QUEEN_PROMOTION_CAPTURE_FLAG, nPawn, turn,
                                pos.board.pieceOnSq(idx), cBlack));
+          moveVec.push_back(Move(idx - 7, idx, ROOK_PROMOTION_CAPTURE_FLAG, nPawn, turn,
+                               pos.board.pieceOnSq(idx), cBlack));
+          moveVec.push_back(Move(idx - 7, idx, KNIGHT_PROMOTION_CAPTURE_FLAG, nPawn, turn,
+                               pos.board.pieceOnSq(idx), cBlack));
+          moveVec.push_back(Move(idx - 7, idx, BISHOP_PROMOTION_CAPTURE_FLAG, nPawn, turn,
+                               pos.board.pieceOnSq(idx), cBlack));
+        } else {
+          moveVec.push_back(Move(idx - 7, idx, CAPTURE_FLAG, nPawn, turn,
+                                pos.board.pieceOnSq(idx), cBlack));
+        }
       } while (pawnWestAttacks &= pawnWestAttacks - 1);
 
     // En-passant
@@ -293,15 +325,23 @@ void generateMoves(const Position &pos, vector<Move> &moveVec, Color turn) {
     if (pawnSinglePushTargets)
       do {
         int idx = bitScanForward(pawnSinglePushTargets);
-        moveVec.push_back(Move(idx + 8, idx, 0, nPawn, turn, nEmpty, cWhite));
+        if (idx < 8) {
+          moveVec.push_back(Move(idx + 8, idx, QUEEN_PROMOTION_FLAG, nPawn, cBlack, nEmpty, cWhite));
+          moveVec.push_back(Move(idx + 8, idx, ROOK_PROMOTION_FLAG, nPawn, cBlack, nEmpty, cWhite));
+          moveVec.push_back(Move(idx + 8, idx, KNIGHT_PROMOTION_FLAG, nPawn, cBlack, nEmpty, cWhite));
+          moveVec.push_back(Move(idx + 8, idx, BISHOP_PROMOTION_FLAG, nPawn, cBlack, nEmpty, cWhite));
+        } else {
+          moveVec.push_back(Move(idx + 8, idx, 0, nPawn, turn, nEmpty, cWhite));
+        }
       } while (pawnSinglePushTargets &= pawnSinglePushTargets - 1);
 
-    if (pawnDoublePushTargets)
+    if (pawnDoublePushTargets) {
       do {
         int idx = bitScanForward(pawnDoublePushTargets);
         moveVec.push_back(Move(idx + 16, idx, DOUBLE_PAWN_PUSH_FLAG, nPawn,
-                               turn, nEmpty, cWhite));
+                              turn, nEmpty, cWhite));
       } while (pawnDoublePushTargets &= pawnDoublePushTargets - 1);
+    }
 
     // Pawn attacks
     Bitboard pawnEastAttacks = bPawnEastAttack(pawns, opponent);
@@ -310,15 +350,29 @@ void generateMoves(const Position &pos, vector<Move> &moveVec, Color turn) {
     if (pawnEastAttacks)
       do {
         int idx = bitScanForward(pawnEastAttacks);
-        moveVec.push_back(Move(idx + 7, idx, 4, nPawn, cBlack,
-                               pos.board.pieceOnSq(idx), cWhite));
+        if (idx < 8) {
+          moveVec.push_back(Move(idx + 7, idx, QUEEN_PROMOTION_CAPTURE_FLAG, nPawn, cBlack, nEmpty, cWhite));
+          moveVec.push_back(Move(idx + 7, idx, ROOK_PROMOTION_CAPTURE_FLAG, nPawn, cBlack, nEmpty, cWhite));
+          moveVec.push_back(Move(idx + 7, idx, KNIGHT_PROMOTION_CAPTURE_FLAG, nPawn, cBlack, nEmpty, cWhite));
+          moveVec.push_back(Move(idx + 7, idx, BISHOP_PROMOTION_CAPTURE_FLAG, nPawn, cBlack, nEmpty, cWhite));
+        } else {
+          moveVec.push_back(Move(idx + 7, idx, CAPTURE_FLAG, nPawn, cBlack,
+                                pos.board.pieceOnSq(idx), cWhite));
+        }
       } while (pawnEastAttacks &= pawnEastAttacks - 1);
 
     if (pawnWestAttacks)
       do {
         int idx = bitScanForward(pawnWestAttacks);
-        moveVec.push_back(Move(idx + 9, idx, 4, nPawn, cBlack,
-                               pos.board.pieceOnSq(idx), cWhite));
+        if (idx < 8) {
+          moveVec.push_back(Move(idx + 9, idx, QUEEN_PROMOTION_CAPTURE_FLAG, nPawn, cBlack, nEmpty, cWhite));
+          moveVec.push_back(Move(idx + 9, idx, ROOK_PROMOTION_CAPTURE_FLAG, nPawn, cBlack, nEmpty, cWhite));
+          moveVec.push_back(Move(idx + 9, idx, KNIGHT_PROMOTION_CAPTURE_FLAG, nPawn, cBlack, nEmpty, cWhite));
+          moveVec.push_back(Move(idx + 9, idx, BISHOP_PROMOTION_CAPTURE_FLAG, nPawn, cBlack, nEmpty, cWhite));
+        } else {
+          moveVec.push_back(Move(idx + 9, idx, 4, nPawn, cBlack,
+                                pos.board.pieceOnSq(idx), cWhite));
+        }
       } while (pawnWestAttacks &= pawnWestAttacks - 1);
 
     // En-passant
@@ -396,14 +450,16 @@ void generateMoves(const Position &pos, vector<Move> &moveVec, Color turn) {
 
   // Queen
   if (queen) {
-    int idx = bitScanForward(queen);
-    const Magic &bm = Magic::bishopTable[idx], rm = Magic::rookTable[idx];
-    Bitboard bocc = pos.board.getOccupied() & bm.mask,
-             rocc = pos.board.getOccupied() & rm.mask;
-    Bitboard moves = (bm.ptr[transform(bocc, bm.magic, bm.shift)] |
-                      rm.ptr[transform(rocc, rm.magic, rm.shift)]) &
-                     ~own;
-    addFromBitboard(idx, moves, pos, moveVec, opponent, turn, nQueen);
+    do {
+      int from = bitScanForward(queen);
+      const Magic &bm = Magic::bishopTable[from], rm = Magic::rookTable[from];
+      Bitboard bocc = pos.board.getOccupied() & bm.mask,
+               rocc = pos.board.getOccupied() & rm.mask;
+      Bitboard moves = (bm.ptr[transform(bocc, bm.magic, bm.shift)] |
+                        rm.ptr[transform(rocc, rm.magic, rm.shift)]) &
+                      ~own;
+      addFromBitboard(from, moves, pos, moveVec, opponent, turn, nQueen);
+    } while (queen &= queen - 1);
   }
 }
 
