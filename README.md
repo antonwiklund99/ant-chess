@@ -1,0 +1,1 @@
+https://lichess.org/@/antonBot (running on VM.Standard.E2.1.Micro on OracleCloud, 1/2 vCPU@2GHz and 1 GB memory)
